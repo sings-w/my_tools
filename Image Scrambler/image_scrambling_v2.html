@@ -23,6 +23,8 @@
             --accent-mid: rgba(5,150,105,0.16);
             --secondary: #dc2626;
             --secondary-dim: rgba(220,38,38,0.06);
+            --amber: #d97706;
+            --amber-dim: rgba(217,119,6,0.08);
             --text: #1c1917;
             --text-bright: #0c0a09;
             --text-muted: #78716c;
@@ -85,6 +87,47 @@
         .subtitle {
             font-size: 0.72rem; color: var(--text-muted);
             font-weight: 400; letter-spacing: 0.04em; margin-top: 0.25rem;
+        }
+
+        /* ===== GLOBAL DRAG OVERLAY ===== */
+        .global-drop-overlay {
+            display: none;
+            position: fixed; inset: 0;
+            z-index: 9998;
+            background: rgba(250,249,246,0.92);
+            backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+            align-items: center; justify-content: center;
+            flex-direction: column; gap: 1rem;
+        }
+
+        .global-drop-overlay.visible { display: flex; }
+
+        .global-drop-overlay .drop-icon {
+            color: var(--accent);
+            animation: dropBounce 1.2s ease infinite;
+        }
+
+        @keyframes dropBounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+
+        .global-drop-overlay .drop-text {
+            font-family: var(--font-display); font-weight: 700;
+            font-size: 1.1rem; color: var(--text-bright);
+            letter-spacing: -0.01em;
+        }
+
+        .global-drop-overlay .drop-hint {
+            font-size: 0.72rem; color: var(--text-muted); font-weight: 300;
+        }
+
+        .global-drop-overlay .drop-border {
+            position: absolute; inset: 12px;
+            border: 2px dashed var(--accent);
+            border-radius: 20px;
+            pointer-events: none;
+            opacity: 0.5;
         }
 
         /* ===== UPLOAD ===== */
@@ -157,6 +200,25 @@
         }
 
         .canvas-wrap canvas { display: block; width: 100%; height: auto; border-radius: var(--radius-sm); }
+
+        .info-grid {
+            display: flex; flex-wrap: wrap; gap: 0.15rem 0.8rem;
+            margin-top: 0.55rem; padding-top: 0.5rem;
+            border-top: 1px solid var(--border);
+        }
+
+        .info-item { display: flex; align-items: baseline; gap: 0.3rem; }
+
+        .info-label {
+            font-size: 0.58rem; color: var(--text-muted);
+            text-transform: uppercase; letter-spacing: 0.08em; font-weight: 500;
+        }
+
+        .info-val {
+            font-size: 0.68rem; color: var(--text); font-weight: 400;
+            font-variant-numeric: tabular-nums;
+        }
+
         .canvas-meta { font-size: 0.65rem; color: var(--text-muted); margin-top: 0.5rem; font-weight: 300; }
 
         /* ===== COMPARISON SLIDER ===== */
@@ -214,12 +276,17 @@
         /* ===== CONTROLS ===== */
         .controls {
             display: flex; flex-wrap: wrap; gap: 0.6rem; align-items: center;
-            margin-bottom: 1.25rem; padding: 1rem;
+            margin-bottom: 0; padding: 1rem;
             background: var(--surface); border: 1px solid var(--border);
-            border-radius: var(--radius); box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+            border-radius: var(--radius) var(--radius) 0 0;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+            position: relative; z-index: 2;
         }
 
-        .btn-group { display: flex; gap: 0.5rem; }
+        .btn-group {
+            display: flex; gap: 0.5rem;
+            flex-wrap: wrap;
+        }
 
         .btn {
             font-family: var(--font-mono); font-size: 0.75rem; font-weight: 500;
@@ -258,6 +325,20 @@
             background: rgba(220,38,38,0.1); border-color: var(--secondary);
             box-shadow: 0 2px 8px rgba(220,38,38,0.12); color: var(--secondary);
         }
+
+        .btn-advanced.active {
+            border-color: var(--amber);
+            color: var(--amber);
+            background: var(--amber-dim);
+        }
+
+        .btn-advanced .mode-dot {
+            width: 5px; height: 5px; border-radius: 50%;
+            background: var(--amber);
+            display: none;
+        }
+
+        .btn-advanced.has-custom .mode-dot { display: block; }
 
         .btn:disabled { opacity: 0.35; cursor: not-allowed; pointer-events: none; }
         .btn-icon { font-size: 0.85em; }
@@ -314,6 +395,68 @@
         .curve-select:hover, .curve-select:focus,
         .format-select:hover, .format-select:focus { border-color: var(--accent); }
 
+        /* ===== ADVANCED PANEL ===== */
+        .advanced-panel {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-top: none;
+            border-radius: 0 0 var(--radius) var(--radius);
+            margin-bottom: 1.25rem;
+            overflow: hidden;
+            max-height: 0;
+            opacity: 0;
+            transition: max-height 0.35s ease, opacity 0.25s ease, padding 0.35s ease;
+            padding: 0 1rem;
+        }
+
+        .advanced-panel.open {
+            max-height: 200px;
+            opacity: 1;
+            padding: 0.85rem 1rem 1rem;
+        }
+
+        .advanced-row {
+            display: flex; flex-wrap: wrap; gap: 1.2rem; align-items: center;
+        }
+
+        .advanced-divider {
+            width: 1px; height: 24px; background: var(--border); flex-shrink: 0;
+        }
+
+        .advanced-note {
+            font-size: 0.62rem; color: var(--text-muted); font-weight: 300;
+            margin-top: 0.5rem; line-height: 1.6;
+        }
+
+        .advanced-note strong { color: var(--amber); font-weight: 500; }
+
+        .text-input {
+            font-family: var(--font-mono); font-size: 0.72rem; font-weight: 400;
+            padding: 0.4rem 0.6rem;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm); background: var(--surface);
+            color: var(--text); outline: none;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+            width: 150px;
+        }
+
+        .text-input:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 2px var(--accent-dim);
+        }
+
+        .text-input::placeholder { color: var(--text-muted); opacity: 0.5; }
+
+        .offset-indicator {
+            font-size: 0.62rem; font-weight: 500;
+            padding: 0.2em 0.5em; border-radius: 4px;
+            transition: all 0.2s ease;
+        }
+
+        .offset-indicator.mode-default { background: var(--accent-dim); color: var(--accent); }
+        .offset-indicator.mode-custom { background: var(--amber-dim); color: var(--amber); }
+        .offset-indicator.mode-password { background: var(--secondary-dim); color: var(--secondary); }
+
         /* ===== MODAL ===== */
         .modal-overlay {
             display: none;
@@ -367,8 +510,7 @@
         .modal-body { padding: 1.25rem; }
 
         .tutorial-section {
-            margin-bottom: 1.5rem;
-            padding-bottom: 1.5rem;
+            margin-bottom: 1.5rem; padding-bottom: 1.5rem;
             border-bottom: 1px solid var(--border);
         }
 
@@ -390,17 +532,12 @@
         }
 
         .tutorial-section p, .tutorial-section li {
-            font-size: 0.75rem; color: var(--text-muted); line-height: 1.75;
-            font-weight: 300;
+            font-size: 0.75rem; color: var(--text-muted); line-height: 1.75; font-weight: 300;
         }
 
-        .tutorial-section ul {
-            list-style: none; padding-left: 0; margin-top: 0.4rem;
-        }
+        .tutorial-section ul { list-style: none; padding-left: 0; margin-top: 0.4rem; }
 
-        .tutorial-section li {
-            padding-left: 1.1rem; position: relative; margin-bottom: 0.25rem;
-        }
+        .tutorial-section li { padding-left: 1.1rem; position: relative; margin-bottom: 0.25rem; }
 
         .tutorial-section li::before {
             content: '\2022'; position: absolute; left: 0;
@@ -417,8 +554,7 @@
         .tutorial-section strong { color: var(--text); font-weight: 500; }
 
         .tutorial-grid {
-            display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem;
-            margin-top: 0.5rem;
+            display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem; margin-top: 0.5rem;
         }
 
         .tutorial-kv {
@@ -432,13 +568,12 @@
             margin-top: 0.6rem; padding: 0.6rem 0.8rem;
             background: var(--accent-dim); border: 1px solid rgba(5,150,105,0.12);
             border-radius: var(--radius-sm);
-            font-size: 0.7rem; color: var(--text); font-weight: 300;
-            line-height: 1.7;
+            font-size: 0.7rem; color: var(--text); font-weight: 300; line-height: 1.7;
         }
 
         .tutorial-tip strong { color: var(--accent); font-weight: 600; }
 
-        /* ===== COLLAPSIBLE SECTIONS ===== */
+        /* ===== COLLAPSIBLE ===== */
         .collapsible {
             background: var(--surface); border: 1px solid var(--border);
             border-radius: var(--radius); margin-bottom: 1.25rem; overflow: hidden;
@@ -497,7 +632,6 @@
             color: var(--accent);
         }
 
-        /* ===== HEATMAP LEGEND ===== */
         .heatmap-legend { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.85rem; }
 
         .legend-bar {
@@ -525,7 +659,7 @@
         }
 
         .status-dot.ready { background: var(--accent); box-shadow: 0 0 6px var(--accent-mid); }
-        .status-dot.busy { background: #d97706; box-shadow: 0 0 6px rgba(217,119,6,0.35); animation: pulse 1s ease infinite; }
+        .status-dot.busy { background: var(--amber); box-shadow: 0 0 6px rgba(217,119,6,0.35); animation: pulse 1s ease infinite; }
         .status-dot.done { background: var(--accent); box-shadow: 0 0 6px var(--accent-mid); }
         .status-dot.error { background: var(--secondary); box-shadow: 0 0 6px rgba(220,38,38,0.3); }
 
@@ -546,15 +680,39 @@
             .controls { gap: 0.5rem; }
             .spacer { display: none; }
             .ctrl-group { flex-wrap: wrap; }
-            .divider { display: none; }
+            .divider, .advanced-divider { display: none; }
             .upload-zone { padding: 2.5rem 1.5rem; }
             .modal { max-height: calc(100vh - 2rem); }
             .modal-overlay.open { padding: 1rem 0.5rem; }
             .tutorial-grid { grid-template-columns: 1fr; }
+            .advanced-row { gap: 0.8rem; }
+
+            .btn { padding: 0.45rem 0.7rem; font-size: 0.7rem; }
+            .btn-group { width: 100%; }
+        }
+
+        @media (max-width: 420px) {
+            .btn { padding: 0.4rem 0.55rem; font-size: 0.68rem; gap: 0.25rem; }
+            .ctrl-group { gap: 0.35rem; }
+            input[type="range"] { width: 70px; }
+            .text-input { width: 110px; font-size: 0.68rem; }
         }
     </style>
 </head>
 <body>
+    <!-- ===== GLOBAL DROP OVERLAY ===== -->
+    <div class="global-drop-overlay" id="globalDropOverlay">
+        <div class="drop-border"></div>
+        <div class="drop-icon">
+            <svg width="64" height="64" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="8" y="8" width="48" height="48" rx="8" stroke-dasharray="5 4"/>
+                <path d="M32 22v20M22 32h20"/>
+            </svg>
+        </div>
+        <p class="drop-text">释放以加载图片</p>
+        <p class="drop-hint">支持 JPG / PNG / WebP</p>
+    </div>
+
     <div class="app">
         <header>
             <div class="logo-mark">
@@ -587,7 +745,7 @@
                     <div class="canvas-card">
                         <div class="canvas-label">原始图像</div>
                         <div class="canvas-wrap"><canvas id="cvsOriginal"></canvas></div>
-                        <div class="canvas-meta" id="metaOriginal"></div>
+                        <div class="info-grid" id="infoGrid"></div>
                     </div>
                     <div class="canvas-card">
                         <div class="canvas-label" id="lblResult">对比查看</div>
@@ -647,6 +805,32 @@
                         <input type="range" id="rngQuality" min="10" max="100" value="95">
                         <span class="ctrl-value" id="valQuality">95%</span>
                     </div>
+                    <button class="btn btn-advanced" id="btnAdvanced"><span class="mode-dot"></span> <span class="btn-icon">&#9662;</span> 高级</button>
+                </div>
+
+                <div class="advanced-panel" id="advancedPanel">
+                    <div class="advanced-row">
+                        <div class="ctrl-group">
+                            <span class="ctrl-label">密码</span>
+                            <input type="password" id="inpPassword" class="text-input" placeholder="留空使用偏移比例" autocomplete="off">
+                        </div>
+                        <div class="advanced-divider"></div>
+                        <div class="ctrl-group">
+                            <span class="ctrl-label">偏移比例</span>
+                            <input type="range" id="rngOffset" min="0.01" max="0.99" step="0.001" value="0.618">
+                            <span class="ctrl-value" id="valOffset">0.618</span>
+                        </div>
+                        <div class="advanced-divider"></div>
+                        <div class="ctrl-group">
+                            <span class="ctrl-label">模式</span>
+                            <span class="offset-indicator mode-default" id="offsetIndicator">黄金分割 (默认)</span>
+                        </div>
+                    </div>
+                    <p class="advanced-note">
+                        <strong>密码模式：</strong>输入密码后，偏移量由 SHA-256 哈希派生，没有密码无法解混淆。
+                        <strong>偏移比例：</strong>自定义循环位移占总像素的比例，默认 0.618 为黄金分割。
+                        修改设置后需重新混淆才能生效。
+                    </p>
                 </div>
 
                 <details class="collapsible" id="heatmapDetails">
@@ -669,7 +853,7 @@
                     </div>
                 </details>
 
-                <details class="collapsible" id="curveDetails" open>
+                <details class="collapsible" id="curveDetails">
                     <summary>
                         <span class="coll-title" id="curveTitleText">GILBERT 曲线可视化</span>
                         <span class="coll-hint">空间填充路径</span>
@@ -692,7 +876,6 @@
         </footer>
     </div>
 
-    <!-- ===== HELP MODAL ===== -->
     <div class="modal-overlay" id="helpOverlay">
         <div class="modal" id="helpModal">
             <div class="modal-header">
@@ -705,83 +888,70 @@
                     <p>支持三种方式将图片导入工具：</p>
                     <ul>
                         <li><strong>点击上传区域</strong>，从文件管理器选择图片</li>
-                        <li><strong>拖放</strong>图片文件到上传区域</li>
+                        <li><strong>拖放</strong>图片文件到页面任意位置</li>
                         <li>使用 <kbd>Ctrl</kbd>+<kbd>V</kbd> 从剪贴板<strong>粘贴</strong>截图或图片</li>
                     </ul>
                     <div class="tutorial-tip">
-                        <strong>提示：</strong>超过 800 万像素的图片会自动缩放。处理过程中可随时点击「更换」按钮加载新图片。
+                        <strong>提示：</strong>超过 800 万像素的图片会自动缩放。上传后左侧面板会显示图片的尺寸、像素数、宽高比和估算大小。
                     </div>
                 </div>
-
                 <div class="tutorial-section">
                     <h3><span class="step-num">2</span>混淆与解混淆</h3>
                     <p>点击 <strong>混淆</strong> 按钮打乱图像像素排列，视觉上无法辨认原图内容。点击 <strong>解混淆</strong> 按钮可精确还原。</p>
-                    <p>核心算法基于空间填充曲线的<strong>循环位移</strong>：将像素沿曲线方向按黄金分割比例偏移，使空间相邻像素被分散到图像各处。解混淆使用逆向偏移，数学上完全可逆。</p>
+                    <p>核心算法基于空间填充曲线的<strong>循环位移</strong>：将像素沿曲线方向按偏移量移位，使空间相邻像素被分散到图像各处。解混淆使用逆向偏移，数学上完全可逆。</p>
                     <div class="tutorial-tip">
                         <strong>提示：</strong>多次混淆等价于更大的单次偏移量。混淆 N 次后，只需解混淆相同轮次即可还原。
                     </div>
                 </div>
-
                 <div class="tutorial-section">
                     <h3><span class="step-num">3</span>曲线类型</h3>
                     <p>三种空间填充曲线可选：</p>
                     <ul>
-                        <li><strong>Gilbert</strong>（默认）：支持任意矩形，相邻点始终连通，空间局部性好</li>
-                        <li><strong>Hilbert</strong>：经典曲线，在正方形网格上局部性最优</li>
+                        <li><strong>Gilbert</strong>（默认）：支持任意矩形，相邻点始终连通</li>
+                        <li><strong>Hilbert</strong>：经典曲线，正方形网格上局部性最优</li>
                         <li><strong>Morton</strong>（Z-order）：比特交错生成，计算速度最快</li>
                     </ul>
-                    <p>切换曲线会自动重新生成映射关系，后续混淆操作使用新曲线。不同曲线的混淆视觉效果不同，但安全性相同。</p>
                 </div>
-
                 <div class="tutorial-section">
                     <h3><span class="step-num">4</span>轮次控制</h3>
                     <p>拖动 <strong>轮次</strong> 滑块设置每次操作的混淆/解混淆强度（1~20 轮）。</p>
                     <p>例如：轮次设为 3 时点击「混淆」，等价于连续执行 3 次基础混淆。要还原则需将轮次同样设为 3 后点击「解混淆」。</p>
                 </div>
-
                 <div class="tutorial-section">
-                    <h3><span class="step-num">5</span>输出格式</h3>
+                    <h3><span class="step-num">5</span>高级模式</h3>
+                    <p>点击控件栏的 <strong>高级</strong> 按钮展开高级设置面板：</p>
                     <ul>
-                        <li><strong>JPEG</strong>：文件较小，适合分享。可调节质量（10%~100%），质量越低压缩越重</li>
+                        <li><strong>密码模式</strong>：输入密码后，偏移量由 SHA-256 哈希派生。没有正确密码就无法解混淆，安全性大幅提升</li>
+                        <li><strong>自定义偏移比例</strong>：手动设置循环位移占总像素的比例（0.01~0.99），默认 0.618 为黄金分割比例</li>
+                    </ul>
+                    <div class="tutorial-tip">
+                        <strong>重要：</strong>解混淆时必须使用与混淆时<strong>完全相同</strong>的曲线类型、轮次、密码和偏移比例，否则无法正确还原。
+                    </div>
+                </div>
+                <div class="tutorial-section">
+                    <h3><span class="step-num">6</span>输出格式</h3>
+                    <ul>
+                        <li><strong>JPEG</strong>：文件较小，可调节质量（10%~100%）</li>
                         <li><strong>PNG</strong>：无损格式，像素数据完全保留</li>
                     </ul>
                     <div class="tutorial-tip">
                         <strong>重要：</strong>如果需要无损混淆，请务必选择 <strong>PNG</strong> 格式。JPEG 默认为95%质量，压缩太低可能会破坏混淆后的像素值，导致解混淆后出现马赛克。
                     </div>
                 </div>
-
                 <div class="tutorial-section">
-                    <h3><span class="step-num">6</span>对比查看</h3>
-                    <p>右侧面板内置<strong>滑动对比条</strong>：</p>
+                    <h3><span class="step-num">7</span>对比与分析</h3>
                     <ul>
-                        <li>左右<strong>拖动</strong>分割线，实时对比原始图像与处理结果</li>
-                        <li><strong>双击</strong>对比区域可将分割线重置到中间位置</li>
-                        <li>左侧为原始图像，右侧为处理结果</li>
+                        <li><strong>滑动对比条</strong>：拖动分割线实时对比原图与处理结果，双击重置到中间</li>
+                        <li><strong>像素差异热力图</strong>：展开面板查看每个像素的位移距离分布</li>
                     </ul>
                 </div>
-
-                <div class="tutorial-section">
-                    <h3><span class="step-num">7</span>像素差异热力图</h3>
-                    <p>展开「像素差异热力图」面板，查看每个像素的<strong>位移距离</strong>分布：</p>
-                    <ul>
-                        <li><strong>蓝色</strong>区域：像素位移较小</li>
-                        <li><strong>红色</strong>区域：像素被大幅移动</li>
-                        <li><strong>深色</strong>区域：像素未被移动或位移接近零</li>
-                    </ul>
-                    <p>热力图在面板展开时自动计算，折叠时不消耗性能。每次混淆或重置后会自动刷新。</p>
-                </div>
-
                 <div class="tutorial-section">
                     <h3><span class="step-num">8</span>下载与复制</h3>
                     <ul>
-                        <li><strong>下载</strong>：将处理结果保存为图片文件，格式和质量由控件栏设置决定</li>
-                        <li><strong>复制</strong>：将处理结果复制到系统剪贴板，可直接粘贴到微信、QQ、邮件等应用中</li>
+                        <li><strong>下载</strong>：保存为图片文件，格式和质量由控件栏设置决定</li>
+                        <li><strong>复制</strong>：以 PNG 无损格式复制到剪贴板，可直接粘贴到其他应用</li>
                     </ul>
-                    <div class="tutorial-tip">
-                        <strong>提示：</strong>复制到剪贴板使用 PNG 无损格式，粘贴后像素数据完全保留，适合需要精确解混淆的场景。
-                    </div>
                 </div>
-
                 <div class="tutorial-section">
                     <h3><span class="step-num">9</span>快捷键</h3>
                     <div class="tutorial-grid">
@@ -800,11 +970,10 @@
 
     <script>
     /* ================================================================
-       Gilbert Cipher — v7
-       New: copy to clipboard, help button redesigned
+       Gilbert Cipher — v9
+       New: global drag-and-drop with overlay indicator
     ================================================================ */
 
-    // ===== CURVE METADATA =====
     const CURVE_META = {
         gilbert: {
             name: 'Gilbert',
@@ -830,7 +999,9 @@
         }
     };
 
-    // ===== GILBERT CURVE =====
+    const GOLDEN_RATIO = (Math.sqrt(5) - 1) / 2;
+
+    // ===== CURVES =====
     function gilbert2d(width, height) {
         const N = width * height;
         if (N <= 0) return new Int32Array(0);
@@ -873,7 +1044,6 @@
         return coordinates;
     }
 
-    // ===== HILBERT CURVE =====
     function hilbert_d2xy(n, d) {
         let x = 0, y = 0;
         for (let s = 1; s < n; s <<= 1) {
@@ -901,7 +1071,6 @@
         return coordinates;
     }
 
-    // ===== MORTON CURVE =====
     function part1by1(n) {
         n = (n | (n << 8)) & 0x00FF00FF;
         n = (n | (n << 4)) & 0x0F0F0F0F;
@@ -930,10 +1099,44 @@
         switch (type) { case 'hilbert': return hilbert2d; case 'morton': return morton2d; default: return gilbert2d; }
     }
 
-    // ===== IMAGE PROCESSING =====
-    function processImage(imageData, width, height, rounds, inverse, curve) {
+    // ===== OFFSET =====
+    async function computeBaseOffset() {
+        const N = state.width * state.height;
+        if (N <= 0) return 0;
+
+        const password = dom.inpPassword.value.trim();
+
+        if (password) {
+            try {
+                if (window.crypto && window.crypto.subtle) {
+                    const data = new TextEncoder().encode(password);
+                    const hash = await crypto.subtle.digest('SHA-256', data);
+                    const bytes = new Uint8Array(hash);
+                    let num = 0n;
+                    for (let i = 0; i < 8; i++) num = num * 256n + BigInt(bytes[i]);
+                    return Number(num % BigInt(N));
+                }
+            } catch (e) { /* fallback */ }
+
+            let h = 0;
+            for (let i = 0; i < password.length; i++) h = ((h << 5) - h + password.charCodeAt(i)) | 0;
+            return Math.abs(h) % N;
+        }
+
+        const ratio = parseFloat(dom.rngOffset.value);
+        return Math.round(ratio * N);
+    }
+
+    function getOffsetMode() {
+        if (dom.inpPassword.value.trim()) return 'password';
+        const ratio = parseFloat(dom.rngOffset.value);
+        if (Math.abs(ratio - GOLDEN_RATIO) > 0.0005) return 'custom';
+        return 'default';
+    }
+
+    // ===== PROCESSING =====
+    function processImage(imageData, width, height, rounds, inverse, curve, baseOffset) {
         const N = width * height;
-        const baseOffset = Math.round((Math.sqrt(5) - 1) / 2 * N);
         const offset = inverse ? (N - (rounds * baseOffset) % N) % N : (rounds * baseOffset) % N;
         if (offset === 0) return new ImageData(new Uint8ClampedArray(imageData.data), width, height);
 
@@ -969,7 +1172,7 @@
         HEAT_LUT[i*3] = r; HEAT_LUT[i*3+1] = g; HEAT_LUT[i*3+2] = b;
     }
 
-    // ===== CURVE VISUALIZATION =====
+    // ===== CURVE VIZ =====
     let curveAnimFrame = null;
 
     function drawCurve(canvas, gridW, gridH, curveType) {
@@ -1033,7 +1236,7 @@
 
         const w = state.width, h = state.height, N = w * h;
         const curve = state.curve;
-        const baseOffset = Math.round((Math.sqrt(5) - 1) / 2 * N);
+        const baseOffset = state.lastBaseOffset;
         const offset = (state.depth * baseOffset) % N;
 
         const ctx = dom.cvsHeatmap.getContext('2d');
@@ -1083,7 +1286,7 @@
         }
     }
 
-    // ===== COMPARISON SLIDER =====
+    // ===== COMPARISON =====
     function initComparisonSlider() {
         const container = dom.compareContainer;
         let isDragging = false;
@@ -1123,18 +1326,21 @@
         dom.cvsCompareTop.getContext('2d').putImageData(state.original, 0, 0);
     }
 
-    // ===== APPLICATION STATE =====
+    // ===== STATE =====
     const state = {
         original: null, current: null,
         width: 0, height: 0, depth: 0,
         curve: null, curveType: 'gilbert',
-        heatmapDirty: true
+        heatmapDirty: true,
+        lastBaseOffset: 0,
+        advancedOpen: false
     };
 
-    // ===== DOM REFERENCES =====
+    // ===== DOM =====
     const $ = id => document.getElementById(id);
 
     const dom = {
+        globalDropOverlay:$('globalDropOverlay'),
         uploadZone:      $('uploadZone'),
         fileInput:       $('fileInput'),
         workspace:       $('workspace'),
@@ -1148,7 +1354,7 @@
         cvsHeatmap:      $('cvsHeatmap'),
         cvsLegend:       $('cvsLegend'),
         cvsCurve:        $('cvsCurve'),
-        metaOriginal:    $('metaOriginal'),
+        infoGrid:        $('infoGrid'),
         metaResult:      $('metaResult'),
         lblResult:       $('lblResult'),
         btnScramble:     $('btnScramble'),
@@ -1158,6 +1364,12 @@
         btnReset:        $('btnReset'),
         btnChange:       $('btnChange'),
         btnHelp:         $('btnHelp'),
+        btnAdvanced:     $('btnAdvanced'),
+        advancedPanel:   $('advancedPanel'),
+        inpPassword:     $('inpPassword'),
+        rngOffset:       $('rngOffset'),
+        valOffset:       $('valOffset'),
+        offsetIndicator: $('offsetIndicator'),
         selCurve:        $('selCurve'),
         rngRounds:       $('rngRounds'),
         valRounds:       $('valRounds'),
@@ -1177,7 +1389,64 @@
         helpClose:       $('helpClose')
     };
 
-    // ===== HELP MODAL =====
+    // ===== GLOBAL DRAG & DROP =====
+    (function initGlobalDragDrop() {
+        let dragCounter = 0;
+        const overlay = dom.globalDropOverlay;
+
+        function isImageFile(dataTransfer) {
+            if (!dataTransfer || !dataTransfer.types) return false;
+            return dataTransfer.types.indexOf('Files') !== -1;
+        }
+
+        function extractImageFile(dataTransfer) {
+            if (!dataTransfer || !dataTransfer.files || dataTransfer.files.length === 0) return null;
+            const file = dataTransfer.files[0];
+            return (file && file.type && file.type.startsWith('image/')) ? file : null;
+        }
+
+        document.addEventListener('dragenter', e => {
+            e.preventDefault();
+            if (!isImageFile(e.dataTransfer)) return;
+            dragCounter++;
+            if (dragCounter === 1) overlay.classList.add('visible');
+        });
+
+        document.addEventListener('dragleave', e => {
+            e.preventDefault();
+            dragCounter--;
+            if (dragCounter <= 0) {
+                dragCounter = 0;
+                overlay.classList.remove('visible');
+            }
+        });
+
+        document.addEventListener('dragover', e => {
+            e.preventDefault();
+            if (e.dataTransfer) e.dataTransfer.dropEffect = 'copy';
+        });
+
+        document.addEventListener('drop', e => {
+            e.preventDefault();
+            dragCounter = 0;
+            overlay.classList.remove('visible');
+
+            const file = extractImageFile(e.dataTransfer);
+            if (file) handleFile(file);
+        });
+
+        // Keep upload zone visual feedback working
+        dom.uploadZone.addEventListener('dragover', e => {
+            e.preventDefault();
+            dom.uploadZone.classList.add('dragover');
+        });
+
+        dom.uploadZone.addEventListener('dragleave', () => {
+            dom.uploadZone.classList.remove('dragover');
+        });
+    })();
+
+    // ===== HELP =====
     function openHelp() { dom.helpOverlay.classList.add('open'); }
     function closeHelp() { dom.helpOverlay.classList.remove('open'); }
 
@@ -1185,6 +1454,41 @@
     dom.helpClose.addEventListener('click', closeHelp);
     dom.helpOverlay.addEventListener('click', e => { if (e.target === dom.helpOverlay) closeHelp(); });
     document.addEventListener('keydown', e => { if (e.key === 'Escape' && dom.helpOverlay.classList.contains('open')) closeHelp(); });
+
+    // ===== ADVANCED =====
+    function toggleAdvanced() {
+        state.advancedOpen = !state.advancedOpen;
+        dom.advancedPanel.classList.toggle('open', state.advancedOpen);
+        dom.btnAdvanced.classList.toggle('active', state.advancedOpen);
+        dom.btnAdvanced.querySelector('.btn-icon').textContent = state.advancedOpen ? '\u25B4' : '\u25BE';
+    }
+
+    function updateAdvancedIndicator() {
+        const mode = getOffsetMode();
+        dom.offsetIndicator.className = 'offset-indicator';
+
+        if (mode === 'password') {
+            dom.offsetIndicator.classList.add('mode-password');
+            dom.offsetIndicator.textContent = '\u5bc6\u7801\u6d3e\u751f';
+            dom.btnAdvanced.classList.add('has-custom');
+        } else if (mode === 'custom') {
+            dom.offsetIndicator.classList.add('mode-custom');
+            dom.offsetIndicator.textContent = '\u81ea\u5b9a\u4e49 ' + parseFloat(dom.rngOffset.value).toFixed(3);
+            dom.btnAdvanced.classList.add('has-custom');
+        } else {
+            dom.offsetIndicator.classList.add('mode-default');
+            dom.offsetIndicator.textContent = '\u9ec4\u91d1\u5206\u5272 (\u9ed8\u8ba4)';
+            dom.btnAdvanced.classList.remove('has-custom');
+        }
+    }
+
+    dom.btnAdvanced.addEventListener('click', toggleAdvanced);
+    dom.inpPassword.addEventListener('input', updateAdvancedIndicator);
+
+    dom.rngOffset.addEventListener('input', () => {
+        dom.valOffset.textContent = parseFloat(dom.rngOffset.value).toFixed(3);
+        updateAdvancedIndicator();
+    });
 
     // ===== HELPERS =====
     function setStatus(type, text) {
@@ -1206,8 +1510,26 @@
         return { w: gw, h: gh };
     }
 
-    function formatSize(w, h) {
-        return `${w} \u00d7 ${h} px \u00b7 ${(w * h / 1e6).toFixed(2)} MP`;
+    function gcd(a, b) { return b === 0 ? a : gcd(b, a % b); }
+
+    function formatSize(bytes) {
+        if (bytes < 1024) return bytes + ' B';
+        if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
+        return (bytes / 1048576).toFixed(2) + ' MB';
+    }
+
+    function updateImageInfo() {
+        const w = state.width, h = state.height, N = w * h;
+        const g = gcd(w, h);
+        const ratioW = w / g, ratioH = h / g;
+        const ratioStr = (ratioW <= 100 && ratioH <= 100) ? ratioW + ':' + ratioH : (w / h).toFixed(2) + ':1';
+        const rawBytes = N * 4;
+
+        dom.infoGrid.innerHTML =
+            '<div class="info-item"><span class="info-label">\u5c3a\u5bf8</span><span class="info-val">' + w + ' \u00d7 ' + h + '</span></div>'
+            + '<div class="info-item"><span class="info-label">\u50cf\u7d20</span><span class="info-val">' + (N / 1e6).toFixed(2) + ' MP</span></div>'
+            + '<div class="info-item"><span class="info-label">\u6bd4\u4f8b</span><span class="info-val">' + ratioStr + '</span></div>'
+            + '<div class="info-item"><span class="info-label">\u672a\u538b\u7f29</span><span class="info-val">' + formatSize(rawBytes) + '</span></div>';
     }
 
     function updateResultLabel() {
@@ -1241,7 +1563,6 @@
         dom.valQuality.classList.toggle('disabled', isPng);
     }
 
-    // ===== CURVE REBUILD =====
     async function rebuildCurve() {
         if (state.width <= 0 || state.height <= 0) return;
         setStatus('busy', '\u6b63\u5728\u751f\u6210 ' + CURVE_META[state.curveType].name + ' \u66f2\u7ebf...');
@@ -1251,7 +1572,7 @@
             '\u66f2\u7ebf\u5df2\u5207\u6362\u4e3a ' + CURVE_META[state.curveType].name);
     }
 
-    // ===== FILE HANDLING =====
+    // ===== FILE =====
     function handleFile(file) {
         if (!file || !file.type.startsWith('image/')) return;
 
@@ -1271,7 +1592,7 @@
 
             displayImage(dom.cvsOriginal, state.original);
             updateComparison();
-            dom.metaOriginal.textContent = formatSize(w, h);
+            updateImageInfo();
             updateResultLabel();
 
             dom.cvsCompareTop.style.clipPath = 'inset(0 50% 0 0)';
@@ -1300,9 +1621,13 @@
         disableButtons(true);
         await new Promise(r => setTimeout(r, 20));
         try {
+            const baseOffset = await computeBaseOffset();
+            state.lastBaseOffset = baseOffset;
+
             const t0 = performance.now();
-            state.current = processImage(state.current, state.width, state.height, rounds, false, state.curve);
+            state.current = processImage(state.current, state.width, state.height, rounds, false, state.curve, baseOffset);
             const elapsed = (performance.now() - t0).toFixed(0);
+
             state.depth += rounds;
             state.heatmapDirty = true;
             updateComparison();
@@ -1320,9 +1645,12 @@
         disableButtons(true);
         await new Promise(r => setTimeout(r, 20));
         try {
+            const baseOffset = await computeBaseOffset();
+
             const t0 = performance.now();
-            state.current = processImage(state.current, state.width, state.height, rounds, true, state.curve);
+            state.current = processImage(state.current, state.width, state.height, rounds, true, state.curve, baseOffset);
             const elapsed = (performance.now() - t0).toFixed(0);
+
             state.depth = Math.max(0, state.depth - rounds);
             state.heatmapDirty = true;
             updateComparison();
@@ -1357,9 +1685,7 @@
 
     async function doCopy() {
         if (!state.current) return;
-
         setStatus('busy', '\u6b63\u5728\u590d\u5236\u5230\u526a\u8d34\u677f...');
-
         try {
             const tmp = document.createElement('canvas');
             tmp.width = state.width; tmp.height = state.height;
@@ -1369,9 +1695,7 @@
             if (!blob) throw new Error('\u751f\u6210\u56fe\u7247\u5931\u8d25');
 
             if (navigator.clipboard && navigator.clipboard.write) {
-                await navigator.clipboard.write([
-                    new ClipboardItem({ 'image/png': blob })
-                ]);
+                await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
                 setStatus('done', '\u5df2\u590d\u5236\u5230\u526a\u8d34\u677f \u2014 \u53ef\u76f4\u63a5\u7c98\u8d34\u5230\u5176\u4ed6\u5e94\u7528');
             } else {
                 throw new Error('\u6d4f\u89c8\u5668\u4e0d\u652f\u6301\u526a\u8d34\u677f API');
@@ -1394,16 +1718,10 @@
 
     function doChangeImage() { dom.fileInput.value = ''; dom.fileInput.click(); }
 
-    // ===== EVENT LISTENERS =====
+    // ===== EVENTS =====
     dom.uploadZone.addEventListener('click', () => dom.fileInput.click());
     dom.fileInput.addEventListener('change', e => { if (e.target.files && e.target.files[0]) handleFile(e.target.files[0]); });
 
-    dom.uploadZone.addEventListener('dragover', e => { e.preventDefault(); dom.uploadZone.classList.add('dragover'); });
-    dom.uploadZone.addEventListener('dragleave', () => dom.uploadZone.classList.remove('dragover'));
-    dom.uploadZone.addEventListener('drop', e => { e.preventDefault(); dom.uploadZone.classList.remove('dragover'); if (e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]); });
-
-    document.addEventListener('dragover', e => e.preventDefault());
-    document.addEventListener('drop', e => { e.preventDefault(); const f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0]; if (f && f.type && f.type.startsWith('image/')) handleFile(f); });
     document.addEventListener('paste', e => { const items = e.clipboardData && e.clipboardData.items; if (!items) return; for (const item of items) { if (item.type.startsWith('image/')) { e.preventDefault(); handleFile(item.getAsFile()); return; } } });
 
     dom.btnScramble.addEventListener('click', doScramble);
@@ -1439,7 +1757,9 @@
     });
 
     document.addEventListener('keydown', e => {
-        if (!state.original || e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
+        if (dom.helpOverlay.classList.contains('open')) return;
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT' || e.target.tagName === 'TEXTAREA') return;
+        if (!state.original) return;
         switch (e.key.toLowerCase()) {
             case 's': e.preventDefault(); doScramble(); break;
             case 'u': e.preventDefault(); doUnscramble(); break;
@@ -1453,6 +1773,7 @@
     updateCurveInfo();
     drawHeatmapLegend();
     updateQualityUI();
+    updateAdvancedIndicator();
 
     </script>
 </body>
