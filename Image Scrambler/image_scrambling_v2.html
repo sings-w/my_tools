@@ -22,7 +22,6 @@
             --accent-dim: rgba(5,150,105,0.06);
             --accent-mid: rgba(5,150,105,0.16);
             --secondary: #dc2626;
-            --secondary-hover: #b91c1c;
             --secondary-dim: rgba(220,38,38,0.06);
             --text: #1c1917;
             --text-bright: #0c0a09;
@@ -88,6 +87,7 @@
             font-weight: 400; letter-spacing: 0.04em; margin-top: 0.25rem;
         }
 
+        /* ===== UPLOAD ===== */
         .upload-zone {
             border: 2px dashed var(--border); border-radius: var(--radius);
             padding: 3.5rem 2rem; text-align: center; cursor: pointer;
@@ -112,11 +112,11 @@
 
         .upload-icon { color: var(--text-muted); margin-bottom: 1rem; transition: color 0.3s ease; }
         .upload-zone:hover .upload-icon { color: var(--accent); }
-
         .upload-text { font-size: 0.85rem; color: var(--text); position: relative; }
         .upload-text .accent { color: var(--accent); font-weight: 500; }
         .upload-hint { font-size: 0.68rem; color: var(--text-muted); margin-top: 0.6rem; position: relative; }
 
+        /* ===== WORKSPACE ===== */
         .workspace { display: none; animation: fadeSlideIn 0.5s ease forwards; }
         .workspace.active { display: block; }
 
@@ -157,9 +157,61 @@
         }
 
         .canvas-wrap canvas { display: block; width: 100%; height: auto; border-radius: var(--radius-sm); }
-
         .canvas-meta { font-size: 0.65rem; color: var(--text-muted); margin-top: 0.5rem; font-weight: 300; }
 
+        /* ===== COMPARISON SLIDER ===== */
+        .compare-container {
+            position: relative; overflow: hidden;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border);
+            background: #f0ede6;
+            cursor: ew-resize;
+            user-select: none; -webkit-user-select: none;
+            touch-action: none;
+        }
+
+        .compare-container canvas { display: block; width: 100%; height: auto; }
+
+        .compare-top {
+            position: absolute; top: 0; left: 0;
+            width: 100%; height: 100%;
+            pointer-events: none;
+        }
+
+        .compare-handle {
+            position: absolute; top: 0; bottom: 0;
+            left: 50%; width: 2px;
+            background: rgba(255,255,255,0.95);
+            transform: translateX(-50%);
+            pointer-events: none; z-index: 10;
+            box-shadow: 0 0 6px rgba(0,0,0,0.35);
+        }
+
+        .compare-knob {
+            position: absolute; top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            width: 34px; height: 34px; border-radius: 50%;
+            background: white;
+            box-shadow: 0 1px 8px rgba(0,0,0,0.25);
+            display: flex; align-items: center; justify-content: center;
+            color: #555;
+        }
+
+        .compare-label {
+            position: absolute; top: 8px;
+            padding: 3px 10px;
+            background: rgba(0,0,0,0.55);
+            color: white;
+            font-family: var(--font-mono); font-size: 0.6rem; font-weight: 500;
+            border-radius: 4px;
+            pointer-events: none; z-index: 5;
+            transition: opacity 0.2s ease;
+        }
+
+        .compare-label-l { left: 8px; }
+        .compare-label-r { right: 8px; }
+
+        /* ===== CONTROLS ===== */
         .controls {
             display: flex; flex-wrap: wrap; gap: 0.6rem; align-items: center;
             margin-bottom: 1.25rem; padding: 1rem;
@@ -209,18 +261,17 @@
 
         .btn:disabled { opacity: 0.35; cursor: not-allowed; pointer-events: none; }
         .btn-icon { font-size: 0.85em; }
-
         .divider { width: 1px; height: 26px; background: var(--border); flex-shrink: 0; }
         .spacer { flex: 1; }
 
-        .rounds-control { display: flex; align-items: center; gap: 0.6rem; }
+        .ctrl-group { display: flex; align-items: center; gap: 0.6rem; }
 
-        .rounds-label {
+        .ctrl-label {
             font-size: 0.65rem; color: var(--text-muted);
             text-transform: uppercase; letter-spacing: 0.1em; font-weight: 500;
         }
 
-        .rounds-value {
+        .ctrl-value {
             font-size: 0.85rem; font-weight: 700; color: var(--accent);
             min-width: 2.8ch; text-align: center; font-variant-numeric: tabular-nums;
         }
@@ -236,89 +287,230 @@
             width: 14px; height: 14px; border-radius: 50%;
             background: var(--accent); cursor: pointer;
             box-shadow: 0 0 0 3px rgba(5,150,105,0.12), 0 1px 4px rgba(0,0,0,0.15);
-            transition: box-shadow 0.2s ease;
         }
 
-        input[type="range"]::-webkit-slider-thumb:hover {
-            box-shadow: 0 0 0 5px rgba(5,150,105,0.18), 0 2px 6px rgba(0,0,0,0.2);
-        }
+        input[type="range"]:disabled { opacity: 0.3; cursor: not-allowed; }
+        input[type="range"]:disabled::-webkit-slider-thumb { background: #aaa; cursor: not-allowed; box-shadow: none; }
 
         input[type="range"]::-moz-range-thumb {
             width: 14px; height: 14px; border: none; border-radius: 50%;
             background: var(--accent); cursor: pointer;
         }
 
-        .curve-select {
+        .ctrl-value.disabled { opacity: 0.3; }
+
+        .curve-select, .format-select {
             font-family: var(--font-mono); font-size: 0.72rem; font-weight: 500;
             padding: 0.4rem 2rem 0.4rem 0.6rem; border: 1px solid var(--border);
             border-radius: var(--radius-sm); background: var(--surface);
             color: var(--text); cursor: pointer; outline: none;
-            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+            transition: border-color 0.2s ease;
             -webkit-appearance: none; appearance: none;
             background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M3 4.5l3 3 3-3' fill='none' stroke='%2378716c' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");
             background-repeat: no-repeat;
             background-position: right 0.55rem center;
         }
 
-        .curve-select:hover { border-color: var(--accent); }
-        .curve-select:focus { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-dim); }
+        .curve-select:hover, .curve-select:focus,
+        .format-select:hover, .format-select:focus { border-color: var(--accent); }
 
-        .curve-section {
+        /* ===== MODAL ===== */
+        .modal-overlay {
+            display: none;
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,0.4);
+            backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
+            z-index: 9999;
+            animation: fadeIn 0.2s ease;
+        }
+
+        .modal-overlay.open { display: flex; align-items: flex-start; justify-content: center; padding: 3rem 1rem; }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
+
+        .modal {
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: var(--radius); max-width: 620px; width: 100%;
+            max-height: calc(100vh - 6rem); overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+            animation: slideUp 0.3s ease;
+        }
+
+        .modal::-webkit-scrollbar { width: 6px; }
+        .modal::-webkit-scrollbar-track { background: transparent; }
+        .modal::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+        .modal-header {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 1.1rem 1.25rem;
+            border-bottom: 1px solid var(--border);
+            position: sticky; top: 0; background: var(--surface); z-index: 1;
+        }
+
+        .modal-title {
+            font-family: var(--font-display); font-weight: 700;
+            font-size: 1rem; color: var(--text-bright);
+            letter-spacing: -0.02em;
+        }
+
+        .modal-close {
+            width: 30px; height: 30px; border-radius: 50%;
+            border: 1px solid var(--border); background: var(--surface-2);
+            color: var(--text-muted); cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1rem; transition: all 0.2s ease;
+        }
+
+        .modal-close:hover { color: var(--secondary); border-color: var(--secondary); background: var(--secondary-dim); }
+
+        .modal-body { padding: 1.25rem; }
+
+        .tutorial-section {
+            margin-bottom: 1.5rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .tutorial-section:last-child { margin-bottom: 0; padding-bottom: 0; border-bottom: none; }
+
+        .tutorial-section h3 {
+            font-family: var(--font-display); font-size: 0.85rem; font-weight: 700;
+            color: var(--text-bright); margin-bottom: 0.6rem;
+            display: flex; align-items: center; gap: 0.5rem;
+            letter-spacing: -0.01em;
+        }
+
+        .tutorial-section h3 .step-num {
+            display: inline-flex; align-items: center; justify-content: center;
+            width: 22px; height: 22px; border-radius: 50%;
+            background: var(--accent); color: white;
+            font-family: var(--font-mono); font-size: 0.6rem; font-weight: 700;
+            flex-shrink: 0;
+        }
+
+        .tutorial-section p, .tutorial-section li {
+            font-size: 0.75rem; color: var(--text-muted); line-height: 1.75;
+            font-weight: 300;
+        }
+
+        .tutorial-section ul {
+            list-style: none; padding-left: 0; margin-top: 0.4rem;
+        }
+
+        .tutorial-section li {
+            padding-left: 1.1rem; position: relative; margin-bottom: 0.25rem;
+        }
+
+        .tutorial-section li::before {
+            content: '\2022'; position: absolute; left: 0;
+            color: var(--accent); font-weight: 700;
+        }
+
+        .tutorial-section kbd {
+            font-family: var(--font-mono); font-size: 0.65rem; font-weight: 500;
+            padding: 0.15em 0.45em; border-radius: 4px;
+            background: var(--surface-2); border: 1px solid var(--border);
+            color: var(--text); box-shadow: 0 1px 0 var(--border);
+        }
+
+        .tutorial-section strong { color: var(--text); font-weight: 500; }
+
+        .tutorial-grid {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem;
+            margin-top: 0.5rem;
+        }
+
+        .tutorial-kv {
+            font-size: 0.7rem; color: var(--text-muted); font-weight: 300;
+            display: flex; align-items: center; gap: 0.4rem;
+        }
+
+        .tutorial-kv kbd { flex-shrink: 0; }
+
+        .tutorial-tip {
+            margin-top: 0.6rem; padding: 0.6rem 0.8rem;
+            background: var(--accent-dim); border: 1px solid rgba(5,150,105,0.12);
+            border-radius: var(--radius-sm);
+            font-size: 0.7rem; color: var(--text); font-weight: 300;
+            line-height: 1.7;
+        }
+
+        .tutorial-tip strong { color: var(--accent); font-weight: 600; }
+
+        /* ===== COLLAPSIBLE SECTIONS ===== */
+        .collapsible {
             background: var(--surface); border: 1px solid var(--border);
             border-radius: var(--radius); margin-bottom: 1.25rem; overflow: hidden;
             box-shadow: 0 1px 3px rgba(0,0,0,0.03);
         }
 
-        .curve-title {
+        .collapsible summary {
             padding: 0.85rem 1rem; cursor: pointer;
             display: flex; align-items: center; justify-content: space-between;
             user-select: none; list-style: none; transition: background 0.2s ease;
         }
 
-        .curve-title::-webkit-details-marker { display: none; }
-        .curve-title:hover { background: var(--surface-2); }
+        .collapsible summary::-webkit-details-marker { display: none; }
+        .collapsible summary:hover { background: var(--surface-2); }
 
-        .curve-title-text {
+        .coll-title {
             font-family: var(--font-display); font-size: 0.65rem; font-weight: 600;
             text-transform: uppercase; letter-spacing: 0.12em; color: var(--text-muted);
         }
 
-        .curve-title-hint {
+        .coll-hint {
             font-size: 0.62rem; color: var(--text-muted); opacity: 0.5;
             transition: opacity 0.2s ease;
         }
 
-        .curve-section[open] .curve-title-hint { opacity: 0; }
+        .collapsible[open] .coll-hint { opacity: 0; }
 
-        .curve-title::after {
+        .collapsible summary::after {
             content: '\25B8'; font-size: 0.7rem; color: var(--text-muted);
             transition: transform 0.25s ease; margin-left: 0.5rem;
         }
 
-        .curve-section[open] .curve-title::after { transform: rotate(90deg); }
+        .collapsible[open] summary::after { transform: rotate(90deg); }
 
-        .curve-body { padding: 0 1rem 1.25rem; }
+        .coll-body { padding: 0 1rem 1.25rem; }
 
-        .curve-canvas-wrap {
-            display: flex; justify-content: center; background: #0c1020;
-            border-radius: var(--radius-sm); padding: 1.25rem; margin-bottom: 0.85rem;
+        .coll-canvas-wrap {
+            display: flex; justify-content: center;
+            background: #0c1020; border-radius: var(--radius-sm);
+            padding: 1.25rem; margin-bottom: 0.85rem;
         }
 
-        .curve-canvas-wrap canvas { display: block; border-radius: 4px; image-rendering: pixelated; }
+        .coll-canvas-wrap canvas { display: block; border-radius: 4px; image-rendering: pixelated; }
+        .coll-canvas-wrap canvas.heatmap-canvas { image-rendering: auto; max-width: 100%; height: auto; }
 
-        .curve-desc {
+        .coll-desc {
             font-size: 0.7rem; color: var(--text-muted); line-height: 1.7;
             font-weight: 300; max-width: 680px;
         }
 
-        .curve-desc strong { color: var(--text); font-weight: 500; }
+        .coll-desc strong { color: var(--text); font-weight: 500; }
 
-        .curve-desc code {
+        .coll-desc code {
             font-family: var(--font-mono); font-size: 0.68rem;
             background: var(--surface-2); padding: 0.1em 0.35em; border-radius: 3px;
             color: var(--accent);
         }
 
+        /* ===== HEATMAP LEGEND ===== */
+        .heatmap-legend { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.85rem; }
+
+        .legend-bar {
+            flex: 1; height: 10px; border-radius: 3px;
+            border: 1px solid var(--border); max-width: 300px;
+        }
+
+        .legend-label {
+            font-size: 0.6rem; color: var(--text-muted);
+            font-variant-numeric: tabular-nums; white-space: nowrap;
+        }
+
+        /* ===== STATUS ===== */
         .status {
             display: flex; align-items: center; gap: 0.5rem;
             padding: 0.65rem 0.9rem; background: var(--surface);
@@ -353,9 +545,12 @@
             .canvas-grid { grid-template-columns: 1fr; }
             .controls { gap: 0.5rem; }
             .spacer { display: none; }
-            .rounds-control { flex-wrap: wrap; }
+            .ctrl-group { flex-wrap: wrap; }
             .divider { display: none; }
             .upload-zone { padding: 2.5rem 1.5rem; }
+            .modal { max-height: calc(100vh - 2rem); }
+            .modal-overlay.open { padding: 1rem 0.5rem; }
+            .tutorial-grid { grid-template-columns: 1fr; }
         }
     </style>
 </head>
@@ -395,9 +590,21 @@
                         <div class="canvas-meta" id="metaOriginal"></div>
                     </div>
                     <div class="canvas-card">
-                        <div class="canvas-label" id="lblResult">处理结果</div>
-                        <div class="canvas-wrap"><canvas id="cvsResult"></canvas></div>
-                        <div class="canvas-meta" id="metaResult"></div>
+                        <div class="canvas-label" id="lblResult">对比查看</div>
+                        <div class="compare-container" id="compareContainer">
+                            <canvas id="cvsCompareBase"></canvas>
+                            <canvas id="cvsCompareTop" class="compare-top"></canvas>
+                            <div class="compare-handle" id="compareHandle">
+                                <div class="compare-knob">
+                                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M5 3L2 8l3 5"/><path d="M11 3l3 5-3 5"/>
+                                    </svg>
+                                </div>
+                            </div>
+                            <span class="compare-label compare-label-l" id="compareLabelL">原始</span>
+                            <span class="compare-label compare-label-r" id="compareLabelR">处理后</span>
+                        </div>
+                        <div class="canvas-meta" id="metaResult">拖动滑块对比原始图像与处理结果</div>
                     </div>
                 </div>
 
@@ -408,39 +615,68 @@
                     </div>
                     <div class="divider"></div>
                     <div class="btn-group">
-                        <button class="btn" id="btnDownload">&#8595; 下载</button>
-                        <button class="btn" id="btnReset">&#8634; 重置</button>
-                        <button class="btn" id="btnChange">&#8644; 更换图片</button>
+                        <button class="btn" id="btnDownload"><span class="btn-icon">&#8595;</span> 下载</button>
+                        <button class="btn" id="btnCopy"><span class="btn-icon">&#9112;</span> 复制</button>
+                        <button class="btn" id="btnReset"><span class="btn-icon">&#8634;</span> 重置</button>
+                        <button class="btn" id="btnChange"><span class="btn-icon">&#8644;</span> 更换</button>
+                        <button class="btn" id="btnHelp"><span class="btn-icon">?</span> 帮助</button>
                     </div>
                     <div class="spacer"></div>
-                    <div class="rounds-control">
-                        <span class="rounds-label">曲线</span>
+                    <div class="ctrl-group">
+                        <span class="ctrl-label">曲线</span>
                         <select id="selCurve" class="curve-select">
                             <option value="gilbert">Gilbert</option>
                             <option value="hilbert">Hilbert</option>
                             <option value="morton">Morton</option>
                         </select>
                     </div>
-                    <div class="rounds-control">
-                        <span class="rounds-label">轮次</span>
+                    <div class="ctrl-group">
+                        <span class="ctrl-label">轮次</span>
                         <input type="range" id="rngRounds" min="1" max="20" value="1">
-                        <span class="rounds-value" id="valRounds">1</span>
+                        <span class="ctrl-value" id="valRounds">1</span>
                     </div>
-                    <div class="rounds-control">
-                        <span class="rounds-label">质量</span>
+                    <div class="ctrl-group">
+                        <span class="ctrl-label">格式</span>
+                        <select id="selFormat" class="format-select">
+                            <option value="jpeg">JPEG</option>
+                            <option value="png">PNG</option>
+                        </select>
+                    </div>
+                    <div class="ctrl-group" id="qualityGroup">
+                        <span class="ctrl-label">质量</span>
                         <input type="range" id="rngQuality" min="10" max="100" value="95">
-                        <span class="rounds-value" id="valQuality">95%</span>
+                        <span class="ctrl-value" id="valQuality">95%</span>
                     </div>
                 </div>
 
-                <details class="curve-section" id="curveDetails" open>
-                    <summary class="curve-title">
-                        <span class="curve-title-text" id="curveTitleText">GILBERT 曲线可视化</span>
-                        <span class="curve-title-hint">空间填充路径</span>
+                <details class="collapsible" id="heatmapDetails">
+                    <summary>
+                        <span class="coll-title">像素差异热力图</span>
+                        <span class="coll-hint">位移可视化</span>
                     </summary>
-                    <div class="curve-body">
-                        <div class="curve-canvas-wrap"><canvas id="cvsCurve"></canvas></div>
-                        <p class="curve-desc" id="curveDesc"></p>
+                    <div class="coll-body">
+                        <div class="coll-canvas-wrap"><canvas id="cvsHeatmap" class="heatmap-canvas"></canvas></div>
+                        <div class="heatmap-legend">
+                            <span class="legend-label">0 px</span>
+                            <canvas id="cvsLegend" class="legend-bar"></canvas>
+                            <span class="legend-label" id="legendMax">&mdash; px</span>
+                        </div>
+                        <p class="coll-desc">
+                            热力图显示混淆后每个像素从原始位置到当前位置的<strong>欧氏距离</strong>。
+                            蓝色表示位移较小，红色表示位移较大。
+                            深色区域表示像素未被移动或位移接近零。
+                        </p>
+                    </div>
+                </details>
+
+                <details class="collapsible" id="curveDetails" open>
+                    <summary>
+                        <span class="coll-title" id="curveTitleText">GILBERT 曲线可视化</span>
+                        <span class="coll-hint">空间填充路径</span>
+                    </summary>
+                    <div class="coll-body">
+                        <div class="coll-canvas-wrap"><canvas id="cvsCurve"></canvas></div>
+                        <p class="coll-desc" id="curveDesc"></p>
                     </div>
                 </details>
 
@@ -456,15 +692,119 @@
         </footer>
     </div>
 
+    <!-- ===== HELP MODAL ===== -->
+    <div class="modal-overlay" id="helpOverlay">
+        <div class="modal" id="helpModal">
+            <div class="modal-header">
+                <span class="modal-title">使用教程</span>
+                <button class="modal-close" id="helpClose">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="tutorial-section">
+                    <h3><span class="step-num">1</span>上传图片</h3>
+                    <p>支持三种方式将图片导入工具：</p>
+                    <ul>
+                        <li><strong>点击上传区域</strong>，从文件管理器选择图片</li>
+                        <li><strong>拖放</strong>图片文件到上传区域</li>
+                        <li>使用 <kbd>Ctrl</kbd>+<kbd>V</kbd> 从剪贴板<strong>粘贴</strong>截图或图片</li>
+                    </ul>
+                    <div class="tutorial-tip">
+                        <strong>提示：</strong>超过 800 万像素的图片会自动缩放。处理过程中可随时点击「更换」按钮加载新图片。
+                    </div>
+                </div>
+
+                <div class="tutorial-section">
+                    <h3><span class="step-num">2</span>混淆与解混淆</h3>
+                    <p>点击 <strong>混淆</strong> 按钮打乱图像像素排列，视觉上无法辨认原图内容。点击 <strong>解混淆</strong> 按钮可精确还原。</p>
+                    <p>核心算法基于空间填充曲线的<strong>循环位移</strong>：将像素沿曲线方向按黄金分割比例偏移，使空间相邻像素被分散到图像各处。解混淆使用逆向偏移，数学上完全可逆。</p>
+                    <div class="tutorial-tip">
+                        <strong>提示：</strong>多次混淆等价于更大的单次偏移量。混淆 N 次后，只需解混淆相同轮次即可还原。
+                    </div>
+                </div>
+
+                <div class="tutorial-section">
+                    <h3><span class="step-num">3</span>曲线类型</h3>
+                    <p>三种空间填充曲线可选：</p>
+                    <ul>
+                        <li><strong>Gilbert</strong>（默认）：支持任意矩形，相邻点始终连通，空间局部性好</li>
+                        <li><strong>Hilbert</strong>：经典曲线，在正方形网格上局部性最优</li>
+                        <li><strong>Morton</strong>（Z-order）：比特交错生成，计算速度最快</li>
+                    </ul>
+                    <p>切换曲线会自动重新生成映射关系，后续混淆操作使用新曲线。不同曲线的混淆视觉效果不同，但安全性相同。</p>
+                </div>
+
+                <div class="tutorial-section">
+                    <h3><span class="step-num">4</span>轮次控制</h3>
+                    <p>拖动 <strong>轮次</strong> 滑块设置每次操作的混淆/解混淆强度（1~20 轮）。</p>
+                    <p>例如：轮次设为 3 时点击「混淆」，等价于连续执行 3 次基础混淆。要还原则需将轮次同样设为 3 后点击「解混淆」。</p>
+                </div>
+
+                <div class="tutorial-section">
+                    <h3><span class="step-num">5</span>输出格式</h3>
+                    <ul>
+                        <li><strong>JPEG</strong>：文件较小，适合分享。可调节质量（10%~100%），质量越低压缩越重</li>
+                        <li><strong>PNG</strong>：无损格式，像素数据完全保留</li>
+                    </ul>
+                    <div class="tutorial-tip">
+                        <strong>重要：</strong>如果需要无损混淆，请务必选择 <strong>PNG</strong> 格式。JPEG 默认为95%质量，压缩太低可能会破坏混淆后的像素值，导致解混淆后出现马赛克。
+                    </div>
+                </div>
+
+                <div class="tutorial-section">
+                    <h3><span class="step-num">6</span>对比查看</h3>
+                    <p>右侧面板内置<strong>滑动对比条</strong>：</p>
+                    <ul>
+                        <li>左右<strong>拖动</strong>分割线，实时对比原始图像与处理结果</li>
+                        <li><strong>双击</strong>对比区域可将分割线重置到中间位置</li>
+                        <li>左侧为原始图像，右侧为处理结果</li>
+                    </ul>
+                </div>
+
+                <div class="tutorial-section">
+                    <h3><span class="step-num">7</span>像素差异热力图</h3>
+                    <p>展开「像素差异热力图」面板，查看每个像素的<strong>位移距离</strong>分布：</p>
+                    <ul>
+                        <li><strong>蓝色</strong>区域：像素位移较小</li>
+                        <li><strong>红色</strong>区域：像素被大幅移动</li>
+                        <li><strong>深色</strong>区域：像素未被移动或位移接近零</li>
+                    </ul>
+                    <p>热力图在面板展开时自动计算，折叠时不消耗性能。每次混淆或重置后会自动刷新。</p>
+                </div>
+
+                <div class="tutorial-section">
+                    <h3><span class="step-num">8</span>下载与复制</h3>
+                    <ul>
+                        <li><strong>下载</strong>：将处理结果保存为图片文件，格式和质量由控件栏设置决定</li>
+                        <li><strong>复制</strong>：将处理结果复制到系统剪贴板，可直接粘贴到微信、QQ、邮件等应用中</li>
+                    </ul>
+                    <div class="tutorial-tip">
+                        <strong>提示：</strong>复制到剪贴板使用 PNG 无损格式，粘贴后像素数据完全保留，适合需要精确解混淆的场景。
+                    </div>
+                </div>
+
+                <div class="tutorial-section">
+                    <h3><span class="step-num">9</span>快捷键</h3>
+                    <div class="tutorial-grid">
+                        <div class="tutorial-kv"><kbd>S</kbd> 混淆</div>
+                        <div class="tutorial-kv"><kbd>U</kbd> 解混淆</div>
+                        <div class="tutorial-kv"><kbd>D</kbd> 下载</div>
+                        <div class="tutorial-kv"><kbd>R</kbd> 重置</div>
+                    </div>
+                    <div class="tutorial-tip">
+                        <strong>提示：</strong>所有处理均在浏览器内完成，图片数据不会上传到任何服务器。
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
     /* ================================================================
-       Gilbert Curve Image Scrambler
-       Supports: Gilbert, Hilbert, Morton (Z-order) space-filling curves
-       Algorithm: circular shift along curve with golden-ratio offset
+       Gilbert Cipher — v7
+       New: copy to clipboard, help button redesigned
     ================================================================ */
 
-    // ===== CURVE TYPE METADATA =====
-
+    // ===== CURVE METADATA =====
     const CURVE_META = {
         gilbert: {
             name: 'Gilbert',
@@ -491,7 +831,6 @@
     };
 
     // ===== GILBERT CURVE =====
-
     function gilbert2d(width, height) {
         const N = width * height;
         if (N <= 0) return new Int32Array(0);
@@ -535,19 +874,15 @@
     }
 
     // ===== HILBERT CURVE =====
-
     function hilbert_d2xy(n, d) {
         let x = 0, y = 0;
         for (let s = 1; s < n; s <<= 1) {
-            const rx = (d >> 1) & 1;
-            const ry = (d ^ rx) & 1;
+            const rx = (d >> 1) & 1, ry = (d ^ rx) & 1;
             if (ry === 0) {
                 if (rx === 1) { x = s - 1 - x; y = s - 1 - y; }
                 const t = x; x = y; y = t;
             }
-            x += s * rx;
-            y += s * ry;
-            d >>= 2;
+            x += s * rx; y += s * ry; d >>= 2;
         }
         return [x, y];
     }
@@ -555,22 +890,18 @@
     function hilbert2d(width, height) {
         const N = width * height;
         if (N <= 0) return new Int32Array(0);
-        const maxDim = Math.max(width, height);
-        const order = Math.ceil(Math.log2(Math.max(maxDim, 2)));
+        const order = Math.ceil(Math.log2(Math.max(Math.max(width, height), 2)));
         const size = 1 << order;
         const coordinates = new Int32Array(N);
         let idx = 0;
         for (let d = 0; d < size * size && idx < N; d++) {
             const pos = hilbert_d2xy(size, d);
-            if (pos[0] < width && pos[1] < height) {
-                coordinates[idx++] = pos[1] * width + pos[0];
-            }
+            if (pos[0] < width && pos[1] < height) coordinates[idx++] = pos[1] * width + pos[0];
         }
         return coordinates;
     }
 
-    // ===== MORTON (Z-ORDER) CURVE =====
-
+    // ===== MORTON CURVE =====
     function part1by1(n) {
         n = (n | (n << 8)) & 0x00FF00FF;
         n = (n | (n << 4)) & 0x0F0F0F0F;
@@ -579,70 +910,66 @@
         return n;
     }
 
-    function mortonCode(x, y) {
-        return part1by1(x) | (part1by1(y) << 1);
-    }
+    function mortonCode(x, y) { return part1by1(x) | (part1by1(y) << 1); }
 
     function morton2d(width, height) {
         const N = width * height;
         if (N <= 0) return new Int32Array(0);
         const entries = new Array(N);
         let k = 0;
-        for (let y = 0; y < height; y++) {
-            for (let x = 0; x < width; x++) {
-                entries[k] = [mortonCode(x, y), k];
-                k++;
-            }
-        }
+        for (let y = 0; y < height; y++)
+            for (let x = 0; x < width; x++)
+                entries[k] = [mortonCode(x, y), k++];
         entries.sort((a, b) => a[0] - b[0]);
         const coordinates = new Int32Array(N);
         for (let i = 0; i < N; i++) coordinates[i] = entries[i][1];
         return coordinates;
     }
 
-    // ===== CURVE DISPATCH =====
-
     function getCurveFunction(type) {
-        switch (type) {
-            case 'hilbert': return hilbert2d;
-            case 'morton':  return morton2d;
-            default:        return gilbert2d;
-        }
+        switch (type) { case 'hilbert': return hilbert2d; case 'morton': return morton2d; default: return gilbert2d; }
     }
 
     // ===== IMAGE PROCESSING =====
-
     function processImage(imageData, width, height, rounds, inverse, curve) {
         const N = width * height;
         const baseOffset = Math.round((Math.sqrt(5) - 1) / 2 * N);
-        let offset;
-        if (inverse) {
-            offset = (N - (rounds * baseOffset) % N) % N;
-        } else {
-            offset = (rounds * baseOffset) % N;
-        }
+        const offset = inverse ? (N - (rounds * baseOffset) % N) % N : (rounds * baseOffset) % N;
+        if (offset === 0) return new ImageData(new Uint8ClampedArray(imageData.data), width, height);
 
-        if (offset === 0) {
-            return new ImageData(new Uint8ClampedArray(imageData.data), width, height);
-        }
-
-        const src = imageData.data;
-        const dst = new Uint8ClampedArray(src.length);
-
+        const src = imageData.data, dst = new Uint8ClampedArray(src.length);
         for (let i = 0; i < N; i++) {
-            const sp = 4 * curve[i];
-            const dp = 4 * curve[(i + offset) % N];
-            dst[dp]     = src[sp];
-            dst[dp + 1] = src[sp + 1];
-            dst[dp + 2] = src[sp + 2];
-            dst[dp + 3] = src[sp + 3];
+            const sp = 4 * curve[i], dp = 4 * curve[(i + offset) % N];
+            dst[dp] = src[sp]; dst[dp+1] = src[sp+1]; dst[dp+2] = src[sp+2]; dst[dp+3] = src[sp+3];
         }
-
         return new ImageData(dst, width, height);
     }
 
-    // ===== CURVE VISUALIZATION =====
+    // ===== HEATMAP =====
+    function hslToRgb(h, s, l) {
+        h /= 360;
+        const hue2rgb = (p, q, t) => {
+            if (t < 0) t += 1; if (t > 1) t -= 1;
+            if (t < 1/6) return p + (q - p) * 6 * t;
+            if (t < 1/2) return q;
+            if (t < 2/3) return p + (q - p) * (2/3 - t) * 6;
+            return p;
+        };
+        const q = l < 0.5 ? l * (1 + s) : l + s - l * s, p = 2 * l - q;
+        return [
+            Math.round(hue2rgb(p, q, h + 1/3) * 255),
+            Math.round(hue2rgb(p, q, h) * 255),
+            Math.round(hue2rgb(p, q, h - 1/3) * 255)
+        ];
+    }
 
+    const HEAT_LUT = new Uint8Array(256 * 3);
+    for (let i = 0; i < 256; i++) {
+        const [r, g, b] = hslToRgb((1 - i / 255) * 240, 0.85, 0.45 + (i / 255) * 0.1);
+        HEAT_LUT[i*3] = r; HEAT_LUT[i*3+1] = g; HEAT_LUT[i*3+2] = b;
+    }
+
+    // ===== CURVE VISUALIZATION =====
     let curveAnimFrame = null;
 
     function drawCurve(canvas, gridW, gridH, curveType) {
@@ -654,21 +981,15 @@
         const cell = Math.max(3, Math.min(Math.floor(maxPx / gridW), Math.floor(maxPx / gridH)));
         const pad = Math.max(0.5, cell * 0.12);
 
-        canvas.width = gridW * cell;
-        canvas.height = gridH * cell;
+        canvas.width = gridW * cell; canvas.height = gridH * cell;
         const ctx = canvas.getContext('2d');
 
         ctx.fillStyle = '#0c1020';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        ctx.strokeStyle = '#151d35';
-        ctx.lineWidth = 0.5;
-        for (let x = 0; x <= gridW; x++) {
-            ctx.beginPath(); ctx.moveTo(x * cell + 0.5, 0); ctx.lineTo(x * cell + 0.5, canvas.height); ctx.stroke();
-        }
-        for (let y = 0; y <= gridH; y++) {
-            ctx.beginPath(); ctx.moveTo(0, y * cell + 0.5); ctx.lineTo(canvas.width, y * cell + 0.5); ctx.stroke();
-        }
+        ctx.strokeStyle = '#151d35'; ctx.lineWidth = 0.5;
+        for (let x = 0; x <= gridW; x++) { ctx.beginPath(); ctx.moveTo(x*cell+0.5,0); ctx.lineTo(x*cell+0.5,canvas.height); ctx.stroke(); }
+        for (let y = 0; y <= gridH; y++) { ctx.beginPath(); ctx.moveTo(0,y*cell+0.5); ctx.lineTo(canvas.width,y*cell+0.5); ctx.stroke(); }
 
         const batchSize = Math.max(1, Math.ceil(total / 200));
         let cur = 0;
@@ -678,88 +999,194 @@
             for (let i = cur; i < end; i++) {
                 const t = i / Math.max(1, total - 1);
                 const lin = curve[i];
-                const px = lin % gridW, py = Math.floor(lin / gridW);
-                const hue = 165 * (1 - t * 0.95);
-                const sat = 80 + t * 20;
-                const lum = 38 + t * 25;
+                const px = lin % gridW, py = (lin / gridW) | 0;
+                const hue = 165 * (1 - t * 0.95), sat = 80 + t * 20, lum = 38 + t * 25;
                 ctx.fillStyle = `hsla(${hue},${sat}%,${lum}%,0.88)`;
-                ctx.fillRect(px * cell + pad, py * cell + pad, cell - pad * 2, cell - pad * 2);
+                ctx.fillRect(px*cell+pad, py*cell+pad, cell-pad*2, cell-pad*2);
 
                 if (i > 0) {
-                    const prev = curve[i - 1];
-                    const ppx = (prev % gridW) * cell + cell / 2;
-                    const ppy = Math.floor(prev / gridW) * cell + cell / 2;
-                    const cx = px * cell + cell / 2, cy = py * cell + cell / 2;
-                    ctx.strokeStyle = `hsla(${hue},${sat}%,${lum + 18}%,0.35)`;
-                    ctx.lineWidth = Math.max(0.8, cell * 0.12);
-                    ctx.beginPath(); ctx.moveTo(ppx, ppy); ctx.lineTo(cx, cy); ctx.stroke();
+                    const prev = curve[i-1];
+                    const ppx = (prev%gridW)*cell+cell/2, ppy = ((prev/gridW)|0)*cell+cell/2;
+                    ctx.strokeStyle = `hsla(${hue},${sat}%,${lum+18}%,0.35)`;
+                    ctx.lineWidth = Math.max(0.8, cell*0.12);
+                    ctx.beginPath(); ctx.moveTo(ppx,ppy); ctx.lineTo(px*cell+cell/2,py*cell+cell/2); ctx.stroke();
                 }
             }
             if (end < total && end > 0) {
-                const tip = curve[end - 1];
-                const tipX = (tip % gridW) * cell + cell / 2;
-                const tipY = Math.floor(tip / gridW) * cell + cell / 2;
-                const tTip = (end - 1) / Math.max(1, total - 1);
-                const hueTip = 165 * (1 - tTip * 0.95);
-                const grad = ctx.createRadialGradient(tipX, tipY, 0, tipX, tipY, cell * 2.5);
-                grad.addColorStop(0, `hsla(${hueTip},100%,65%,0.5)`);
-                grad.addColorStop(1, `hsla(${hueTip},100%,65%,0)`);
-                ctx.fillStyle = grad;
-                ctx.fillRect(tipX - cell * 3, tipY - cell * 3, cell * 6, cell * 6);
+                const tip = curve[end-1], tipX = (tip%gridW)*cell+cell/2, tipY = ((tip/gridW)|0)*cell+cell/2;
+                const hueTip = 165*(1-((end-1)/Math.max(1,total-1))*0.95);
+                const grad = ctx.createRadialGradient(tipX,tipY,0,tipX,tipY,cell*2.5);
+                grad.addColorStop(0,`hsla(${hueTip},100%,65%,0.5)`);
+                grad.addColorStop(1,`hsla(${hueTip},100%,65%,0)`);
+                ctx.fillStyle = grad; ctx.fillRect(tipX-cell*3,tipY-cell*3,cell*6,cell*6);
             }
             cur = end;
             if (cur < total) curveAnimFrame = requestAnimationFrame(frame);
             else curveAnimFrame = null;
         }
-
         curveAnimFrame = requestAnimationFrame(frame);
     }
 
-    // ===== APPLICATION STATE =====
+    // ===== HEATMAP =====
+    function generateAndDisplayHeatmap() {
+        if (!state.curve || state.width <= 0) return;
 
+        const w = state.width, h = state.height, N = w * h;
+        const curve = state.curve;
+        const baseOffset = Math.round((Math.sqrt(5) - 1) / 2 * N);
+        const offset = (state.depth * baseOffset) % N;
+
+        const ctx = dom.cvsHeatmap.getContext('2d');
+        dom.cvsHeatmap.width = w; dom.cvsHeatmap.height = h;
+
+        if (offset === 0 || state.depth === 0) {
+            ctx.fillStyle = '#1a1a2e'; ctx.fillRect(0, 0, w, h);
+            dom.legendMax.textContent = '0 px';
+            state.heatmapDirty = false;
+            return;
+        }
+
+        const distances = new Float32Array(N);
+        let maxDist = 0;
+
+        for (let i = 0; i < N; i++) {
+            const src = curve[i], dst = curve[(i + offset) % N];
+            const sx = src % w, sy = (src / w) | 0;
+            const dx = dst % w, dy = (dst / w) | 0;
+            const dist = Math.sqrt((dx - sx) ** 2 + (dy - sy) ** 2);
+            distances[dst] = dist;
+            if (dist > maxDist) maxDist = dist;
+        }
+
+        const imgData = new ImageData(w, h);
+        const data = imgData.data;
+        const invMax = maxDist > 0 ? 255 / maxDist : 0;
+
+        for (let j = 0; j < N; j++) {
+            const ti = Math.round(distances[j] * invMax) | 0;
+            const p = j * 4;
+            data[p] = HEAT_LUT[ti*3]; data[p+1] = HEAT_LUT[ti*3+1]; data[p+2] = HEAT_LUT[ti*3+2]; data[p+3] = 255;
+        }
+
+        ctx.putImageData(imgData, 0, 0);
+        dom.legendMax.textContent = Math.round(maxDist) + ' px';
+        state.heatmapDirty = false;
+    }
+
+    function drawHeatmapLegend() {
+        const canvas = dom.cvsLegend;
+        const ctx = canvas.getContext('2d');
+        canvas.width = 256; canvas.height = 12;
+        for (let x = 0; x < 256; x++) {
+            ctx.fillStyle = `rgb(${HEAT_LUT[x*3]},${HEAT_LUT[x*3+1]},${HEAT_LUT[x*3+2]})`;
+            ctx.fillRect(x, 0, 1, 12);
+        }
+    }
+
+    // ===== COMPARISON SLIDER =====
+    function initComparisonSlider() {
+        const container = dom.compareContainer;
+        let isDragging = false;
+
+        function setPosition(clientX) {
+            const rect = container.getBoundingClientRect();
+            const x = Math.max(0, Math.min(clientX - rect.left, rect.width));
+            const pct = (x / rect.width) * 100;
+            dom.cvsCompareTop.style.clipPath = `inset(0 ${100 - pct}% 0 0)`;
+            dom.compareHandle.style.left = pct + '%';
+            dom.compareLabelL.style.opacity = pct > 12 ? '1' : '0';
+            dom.compareLabelR.style.opacity = pct < 88 ? '1' : '0';
+        }
+
+        container.addEventListener('mousedown', e => { isDragging = true; setPosition(e.clientX); e.preventDefault(); });
+        document.addEventListener('mousemove', e => { if (isDragging) setPosition(e.clientX); });
+        document.addEventListener('mouseup', () => { isDragging = false; });
+
+        container.addEventListener('touchstart', e => { isDragging = true; setPosition(e.touches[0].clientX); }, { passive: true });
+        document.addEventListener('touchmove', e => { if (isDragging) { setPosition(e.touches[0].clientX); e.preventDefault(); } }, { passive: false });
+        document.addEventListener('touchend', () => { isDragging = false; });
+
+        container.addEventListener('dblclick', () => {
+            dom.cvsCompareTop.style.clipPath = 'inset(0 50% 0 0)';
+            dom.compareHandle.style.left = '50%';
+            dom.compareLabelL.style.opacity = '1';
+            dom.compareLabelR.style.opacity = '1';
+        });
+    }
+
+    function updateComparison() {
+        if (!state.original || !state.current) return;
+        const w = state.width, h = state.height;
+        dom.cvsCompareBase.width = w; dom.cvsCompareBase.height = h;
+        dom.cvsCompareBase.getContext('2d').putImageData(state.current, 0, 0);
+        dom.cvsCompareTop.width = w; dom.cvsCompareTop.height = h;
+        dom.cvsCompareTop.getContext('2d').putImageData(state.original, 0, 0);
+    }
+
+    // ===== APPLICATION STATE =====
     const state = {
-        original: null,
-        current: null,
-        width: 0,
-        height: 0,
-        depth: 0,
-        curve: null,
-        curveType: 'gilbert'
+        original: null, current: null,
+        width: 0, height: 0, depth: 0,
+        curve: null, curveType: 'gilbert',
+        heatmapDirty: true
     };
 
     // ===== DOM REFERENCES =====
-
     const $ = id => document.getElementById(id);
 
     const dom = {
-        uploadZone:    $('uploadZone'),
-        fileInput:     $('fileInput'),
-        workspace:     $('workspace'),
-        cvsOriginal:   $('cvsOriginal'),
-        cvsResult:     $('cvsResult'),
-        cvsCurve:      $('cvsCurve'),
-        metaOriginal:  $('metaOriginal'),
-        metaResult:    $('metaResult'),
-        lblResult:     $('lblResult'),
-        btnScramble:   $('btnScramble'),
-        btnUnscramble: $('btnUnscramble'),
-        btnDownload:   $('btnDownload'),
-        btnReset:      $('btnReset'),
-        btnChange:     $('btnChange'),
-        selCurve:      $('selCurve'),
-        rngRounds:     $('rngRounds'),
-        valRounds:     $('valRounds'),
-        rngQuality:    $('rngQuality'),
-        valQuality:    $('valQuality'),
-        statusDot:     $('statusDot'),
-        statusText:    $('statusText'),
-        curveDetails:  $('curveDetails'),
-        curveTitleText:$('curveTitleText'),
-        curveDesc:     $('curveDesc')
+        uploadZone:      $('uploadZone'),
+        fileInput:       $('fileInput'),
+        workspace:       $('workspace'),
+        cvsOriginal:     $('cvsOriginal'),
+        cvsCompareBase:  $('cvsCompareBase'),
+        cvsCompareTop:   $('cvsCompareTop'),
+        compareContainer:$('compareContainer'),
+        compareHandle:   $('compareHandle'),
+        compareLabelL:   $('compareLabelL'),
+        compareLabelR:   $('compareLabelR'),
+        cvsHeatmap:      $('cvsHeatmap'),
+        cvsLegend:       $('cvsLegend'),
+        cvsCurve:        $('cvsCurve'),
+        metaOriginal:    $('metaOriginal'),
+        metaResult:      $('metaResult'),
+        lblResult:       $('lblResult'),
+        btnScramble:     $('btnScramble'),
+        btnUnscramble:   $('btnUnscramble'),
+        btnDownload:     $('btnDownload'),
+        btnCopy:         $('btnCopy'),
+        btnReset:        $('btnReset'),
+        btnChange:       $('btnChange'),
+        btnHelp:         $('btnHelp'),
+        selCurve:        $('selCurve'),
+        rngRounds:       $('rngRounds'),
+        valRounds:       $('valRounds'),
+        selFormat:       $('selFormat'),
+        rngQuality:      $('rngQuality'),
+        valQuality:      $('valQuality'),
+        qualityGroup:    $('qualityGroup'),
+        statusDot:       $('statusDot'),
+        statusText:      $('statusText'),
+        curveDetails:    $('curveDetails'),
+        curveTitleText:  $('curveTitleText'),
+        curveDesc:       $('curveDesc'),
+        heatmapDetails:  $('heatmapDetails'),
+        legendMax:       $('legendMax'),
+        helpOverlay:     $('helpOverlay'),
+        helpModal:       $('helpModal'),
+        helpClose:       $('helpClose')
     };
 
-    // ===== HELPERS =====
+    // ===== HELP MODAL =====
+    function openHelp() { dom.helpOverlay.classList.add('open'); }
+    function closeHelp() { dom.helpOverlay.classList.remove('open'); }
 
+    dom.btnHelp.addEventListener('click', openHelp);
+    dom.helpClose.addEventListener('click', closeHelp);
+    dom.helpOverlay.addEventListener('click', e => { if (e.target === dom.helpOverlay) closeHelp(); });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape' && dom.helpOverlay.classList.contains('open')) closeHelp(); });
+
+    // ===== HELPERS =====
     function setStatus(type, text) {
         dom.statusDot.className = 'status-dot ' + type;
         dom.statusText.textContent = text;
@@ -772,8 +1199,7 @@
     }
 
     function getCurveGridSize(imgW, imgH) {
-        const maxDim = 48;
-        const aspect = imgW / imgH;
+        const maxDim = 48, aspect = imgW / imgH;
         let gw, gh;
         if (aspect >= 1) { gw = maxDim; gh = Math.max(6, Math.round(gw / aspect)); }
         else              { gh = maxDim; gw = Math.max(6, Math.round(gh * aspect)); }
@@ -786,10 +1212,11 @@
 
     function updateResultLabel() {
         if (state.depth === 0) {
-            dom.lblResult.innerHTML = '\u5904\u7406\u7ed3\u679c';
-            dom.metaResult.textContent = '\u4e0e\u539f\u59cb\u56fe\u50cf\u76f8\u540c';
+            dom.lblResult.innerHTML = '\u5bf9\u6bd4\u67e5\u770b';
+            dom.metaResult.textContent = '\u4e0e\u539f\u59cb\u56fe\u50cf\u76f8\u540c \u00b7 \u6df7\u6dc6\u540e\u53ef\u62d6\u52a8\u5bf9\u6bd4';
         } else {
-            dom.lblResult.innerHTML = '\u5904\u7406\u7ed3\u679c <span class="tag">\u5df2\u6df7\u6dc6 \u00d7' + state.depth + '</span>';
+            dom.lblResult.innerHTML = '\u5bf9\u6bd4\u67e5\u770b <span class="tag">\u5df2\u6df7\u6dc6 \u00d7' + state.depth + '</span>';
+            dom.metaResult.textContent = state.depth + ' \u8f6e\u6df7\u6dc6 \u00b7 \u62d6\u52a8\u6ed1\u5757\u5bf9\u6bd4';
         }
     }
 
@@ -808,92 +1235,82 @@
         dom.btnUnscramble.disabled = v;
     }
 
-    // ===== CURVE REBUILD =====
+    function updateQualityUI() {
+        const isPng = dom.selFormat.value === 'png';
+        dom.rngQuality.disabled = isPng;
+        dom.valQuality.classList.toggle('disabled', isPng);
+    }
 
+    // ===== CURVE REBUILD =====
     async function rebuildCurve() {
         if (state.width <= 0 || state.height <= 0) return;
         setStatus('busy', '\u6b63\u5728\u751f\u6210 ' + CURVE_META[state.curveType].name + ' \u66f2\u7ebf...');
         await new Promise(r => setTimeout(r, 10));
-        const fn = getCurveFunction(state.curveType);
-        state.curve = fn(state.width, state.height);
-        if (state.depth === 0) {
-            setStatus('ready', '\u5df2\u52a0\u8f7d ' + state.width + '\u00d7' + state.height + ' \u56fe\u50cf \u2014 ' + CURVE_META[state.curveType].name + ' \u66f2\u7ebf\u5c31\u7eea');
-        } else {
-            setStatus('done', '\u66f2\u7ebf\u5df2\u5207\u6362\u4e3a ' + CURVE_META[state.curveType].name);
-        }
+        state.curve = getCurveFunction(state.curveType)(state.width, state.height);
+        setStatus(state.depth === 0 ? 'ready' : 'done',
+            '\u66f2\u7ebf\u5df2\u5207\u6362\u4e3a ' + CURVE_META[state.curveType].name);
     }
 
     // ===== FILE HANDLING =====
-
     function handleFile(file) {
         if (!file || !file.type.startsWith('image/')) return;
 
         const img = new Image();
         img.onload = async function() {
             let w = img.naturalWidth, h = img.naturalHeight;
+            const MAX = 8000000;
+            if (w * h > MAX) { const s = Math.sqrt(MAX / (w * h)); w = Math.round(w * s); h = Math.round(h * s); }
 
-            const MAX_PIXELS = 8000000;
-            if (w * h > MAX_PIXELS) {
-                const scale = Math.sqrt(MAX_PIXELS / (w * h));
-                w = Math.round(w * scale);
-                h = Math.round(h * scale);
-            }
+            state.width = w; state.height = h; state.depth = 0; state.heatmapDirty = true;
 
-            state.width = w;
-            state.height = h;
-            state.depth = 0;
-
-            const offscreen = document.createElement('canvas');
-            offscreen.width = w;
-            offscreen.height = h;
-            offscreen.getContext('2d').drawImage(img, 0, 0, w, h);
-
-            state.original = offscreen.getContext('2d').getImageData(0, 0, w, h);
+            const off = document.createElement('canvas');
+            off.width = w; off.height = h;
+            off.getContext('2d').drawImage(img, 0, 0, w, h);
+            state.original = off.getContext('2d').getImageData(0, 0, w, h);
             state.current = new ImageData(new Uint8ClampedArray(state.original.data), w, h);
 
             displayImage(dom.cvsOriginal, state.original);
-            displayImage(dom.cvsResult, state.current);
+            updateComparison();
             dom.metaOriginal.textContent = formatSize(w, h);
             updateResultLabel();
+
+            dom.cvsCompareTop.style.clipPath = 'inset(0 50% 0 0)';
+            dom.compareHandle.style.left = '50%';
+            dom.compareLabelL.style.opacity = '1';
+            dom.compareLabelR.style.opacity = '1';
 
             dom.uploadZone.style.display = 'none';
             dom.workspace.classList.add('active');
 
             await rebuildCurve();
-
             const gSize = getCurveGridSize(w, h);
             drawCurve(dom.cvsCurve, gSize.w, gSize.h, state.curveType);
 
+            setStatus('ready', '\u5df2\u52a0\u8f7d ' + w + '\u00d7' + h + ' \u56fe\u50cf \u2014 ' + CURVE_META[state.curveType].name + ' \u66f2\u7ebf\u5c31\u7eea');
             URL.revokeObjectURL(img.src);
         };
-        img.onerror = function() {
-            setStatus('error', '\u56fe\u50cf\u52a0\u8f7d\u5931\u8d25');
-            URL.revokeObjectURL(img.src);
-        };
+        img.onerror = function() { setStatus('error', '\u56fe\u50cf\u52a0\u8f7d\u5931\u8d25'); URL.revokeObjectURL(img.src); };
         img.src = URL.createObjectURL(file);
     }
 
     // ===== OPERATIONS =====
-
     async function doScramble() {
         const rounds = parseInt(dom.rngRounds.value);
         setStatus('busy', '\u6b63\u5728\u6df7\u6dc6 (' + state.width + '\u00d7' + state.height + ', ' + rounds + ' \u8f6e)...');
         disableButtons(true);
         await new Promise(r => setTimeout(r, 20));
-
         try {
             const t0 = performance.now();
             state.current = processImage(state.current, state.width, state.height, rounds, false, state.curve);
             const elapsed = (performance.now() - t0).toFixed(0);
-
             state.depth += rounds;
-            displayImage(dom.cvsResult, state.current);
+            state.heatmapDirty = true;
+            updateComparison();
             updateResultLabel();
-            dom.metaResult.textContent = rounds + ' \u8f6e\u6df7\u6dc6 \u00b7 \u8017\u65f6 ' + elapsed + 'ms';
+            dom.metaResult.textContent = rounds + ' \u8f6e\u6df7\u6dc6 \u00b7 \u62d6\u52a8\u6ed1\u5757\u5bf9\u6bd4';
             setStatus('done', '\u6df7\u6dc6\u5b8c\u6210 \u2014 \u6df6\u5ea6 ' + state.depth + ', ' + elapsed + 'ms');
-        } catch (e) {
-            setStatus('error', '\u6df7\u6dc6\u5931\u8d25: ' + e.message);
-        }
+            if (dom.heatmapDetails.open) generateAndDisplayHeatmap();
+        } catch(e) { setStatus('error', '\u6df7\u6dc6\u5931\u8d25: ' + e.message); }
         disableButtons(false);
     }
 
@@ -902,87 +1319,97 @@
         setStatus('busy', '\u6b63\u5728\u89e3\u6df7\u6dc6 (' + state.width + '\u00d7' + state.height + ', ' + rounds + ' \u8f6e)...');
         disableButtons(true);
         await new Promise(r => setTimeout(r, 20));
-
         try {
             const t0 = performance.now();
             state.current = processImage(state.current, state.width, state.height, rounds, true, state.curve);
             const elapsed = (performance.now() - t0).toFixed(0);
-
             state.depth = Math.max(0, state.depth - rounds);
-            displayImage(dom.cvsResult, state.current);
+            state.heatmapDirty = true;
+            updateComparison();
             updateResultLabel();
-            dom.metaResult.textContent = rounds + ' \u8f6e\u89e3\u6df7\u6dc6 \u00b7 \u8017\u65f6 ' + elapsed + 'ms';
+            dom.metaResult.textContent = rounds + ' \u8f6e\u89e3\u6df7\u6dc6 \u00b7 \u62d6\u52a8\u6ed1\u5757\u5bf9\u6bd4';
             setStatus('done', '\u89e3\u6df7\u6dc6\u5b8c\u6210 \u2014 \u6df6\u5ea6 ' + state.depth + ', ' + elapsed + 'ms');
-        } catch (e) {
-            setStatus('error', '\u89e3\u6df7\u6dc6\u5931\u8d25: ' + e.message);
-        }
+            if (dom.heatmapDetails.open) generateAndDisplayHeatmap();
+        } catch(e) { setStatus('error', '\u89e3\u6df7\u6dc6\u5931\u8d25: ' + e.message); }
         disableButtons(false);
     }
 
     function doDownload() {
+        const format = dom.selFormat.value;
         const quality = parseInt(dom.rngQuality.value) / 100;
-        dom.cvsResult.toBlob(function(blob) {
+        const tmp = document.createElement('canvas');
+        tmp.width = state.width; tmp.height = state.height;
+        tmp.getContext('2d').putImageData(state.current, 0, 0);
+
+        const ext = format === 'png' ? 'png' : 'jpg';
+        const mime = format === 'png' ? 'image/png' : 'image/jpeg';
+
+        tmp.toBlob(function(blob) {
             if (!blob) return;
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            const tag = state.depth > 0 ? '_scrambled' : '_original';
-            a.download = 'gilbert' + tag + '_' + state.width + 'x' + state.height + '.jpg';
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
+            a.download = 'gilbert' + (state.depth > 0 ? '_scrambled' : '') + '_' + state.width + 'x' + state.height + '.' + ext;
+            document.body.appendChild(a); a.click(); document.body.removeChild(a);
             URL.revokeObjectURL(url);
-        }, 'image/jpeg', quality);
+        }, mime, format === 'jpeg' ? quality : undefined);
+    }
+
+    async function doCopy() {
+        if (!state.current) return;
+
+        setStatus('busy', '\u6b63\u5728\u590d\u5236\u5230\u526a\u8d34\u677f...');
+
+        try {
+            const tmp = document.createElement('canvas');
+            tmp.width = state.width; tmp.height = state.height;
+            tmp.getContext('2d').putImageData(state.current, 0, 0);
+
+            const blob = await new Promise(resolve => tmp.toBlob(resolve, 'image/png'));
+            if (!blob) throw new Error('\u751f\u6210\u56fe\u7247\u5931\u8d25');
+
+            if (navigator.clipboard && navigator.clipboard.write) {
+                await navigator.clipboard.write([
+                    new ClipboardItem({ 'image/png': blob })
+                ]);
+                setStatus('done', '\u5df2\u590d\u5236\u5230\u526a\u8d34\u677f \u2014 \u53ef\u76f4\u63a5\u7c98\u8d34\u5230\u5176\u4ed6\u5e94\u7528');
+            } else {
+                throw new Error('\u6d4f\u89c8\u5668\u4e0d\u652f\u6301\u526a\u8d34\u677f API');
+            }
+        } catch (e) {
+            setStatus('error', '\u590d\u5236\u5931\u8d25: ' + e.message + ' \u2014 \u8bf7\u4f7f\u7528\u4e0b\u8f7d\u6309\u94ae');
+        }
     }
 
     function doReset() {
         if (!state.original) return;
         state.current = new ImageData(new Uint8ClampedArray(state.original.data), state.width, state.height);
-        state.depth = 0;
-        displayImage(dom.cvsResult, state.current);
+        state.depth = 0; state.heatmapDirty = true;
+        updateComparison();
         updateResultLabel();
-        dom.metaResult.textContent = '\u4e0e\u539f\u59cb\u56fe\u50cf\u76f8\u540c';
+        dom.metaResult.textContent = '\u4e0e\u539f\u59cb\u56fe\u50cf\u76f8\u540c \u00b7 \u6df7\u6dc6\u540e\u53ef\u62d6\u52a8\u5bf9\u6bd4';
         setStatus('ready', '\u5df2\u91cd\u7f6e\u4e3a\u539f\u59cb\u56fe\u50cf');
+        if (dom.heatmapDetails.open) generateAndDisplayHeatmap();
     }
 
-    function doChangeImage() {
-        dom.fileInput.value = '';
-        dom.fileInput.click();
-    }
+    function doChangeImage() { dom.fileInput.value = ''; dom.fileInput.click(); }
 
     // ===== EVENT LISTENERS =====
-
     dom.uploadZone.addEventListener('click', () => dom.fileInput.click());
-
-    dom.fileInput.addEventListener('change', e => {
-        if (e.target.files && e.target.files[0]) handleFile(e.target.files[0]);
-    });
+    dom.fileInput.addEventListener('change', e => { if (e.target.files && e.target.files[0]) handleFile(e.target.files[0]); });
 
     dom.uploadZone.addEventListener('dragover', e => { e.preventDefault(); dom.uploadZone.classList.add('dragover'); });
-    dom.uploadZone.addEventListener('dragleave', () => { dom.uploadZone.classList.remove('dragover'); });
-    dom.uploadZone.addEventListener('drop', e => {
-        e.preventDefault(); dom.uploadZone.classList.remove('dragover');
-        if (e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]);
-    });
+    dom.uploadZone.addEventListener('dragleave', () => dom.uploadZone.classList.remove('dragover'));
+    dom.uploadZone.addEventListener('drop', e => { e.preventDefault(); dom.uploadZone.classList.remove('dragover'); if (e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]); });
 
     document.addEventListener('dragover', e => e.preventDefault());
-    document.addEventListener('drop', e => {
-        e.preventDefault();
-        const f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
-        if (f && f.type && f.type.startsWith('image/')) handleFile(f);
-    });
-
-    document.addEventListener('paste', e => {
-        const items = e.clipboardData && e.clipboardData.items;
-        if (!items) return;
-        for (const item of items) {
-            if (item.type.startsWith('image/')) { e.preventDefault(); handleFile(item.getAsFile()); return; }
-        }
-    });
+    document.addEventListener('drop', e => { e.preventDefault(); const f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0]; if (f && f.type && f.type.startsWith('image/')) handleFile(f); });
+    document.addEventListener('paste', e => { const items = e.clipboardData && e.clipboardData.items; if (!items) return; for (const item of items) { if (item.type.startsWith('image/')) { e.preventDefault(); handleFile(item.getAsFile()); return; } } });
 
     dom.btnScramble.addEventListener('click', doScramble);
     dom.btnUnscramble.addEventListener('click', doUnscramble);
     dom.btnDownload.addEventListener('click', doDownload);
+    dom.btnCopy.addEventListener('click', doCopy);
     dom.btnReset.addEventListener('click', doReset);
     dom.btnChange.addEventListener('click', doChangeImage);
 
@@ -996,12 +1423,19 @@
         }
     });
 
-    dom.rngRounds.addEventListener('input', () => {
-        dom.valRounds.textContent = dom.rngRounds.value;
+    dom.rngRounds.addEventListener('input', () => { dom.valRounds.textContent = dom.rngRounds.value; });
+    dom.rngQuality.addEventListener('input', () => { dom.valQuality.textContent = dom.rngQuality.value + '%'; });
+    dom.selFormat.addEventListener('change', updateQualityUI);
+
+    dom.heatmapDetails.addEventListener('toggle', () => {
+        if (dom.heatmapDetails.open && state.heatmapDirty && state.width > 0) generateAndDisplayHeatmap();
     });
 
-    dom.rngQuality.addEventListener('input', () => {
-        dom.valQuality.textContent = dom.rngQuality.value + '%';
+    dom.curveDetails.addEventListener('toggle', () => {
+        if (dom.curveDetails.open && state.width > 0) {
+            const gSize = getCurveGridSize(state.width, state.height);
+            drawCurve(dom.cvsCurve, gSize.w, gSize.h, state.curveType);
+        }
     });
 
     document.addEventListener('keydown', e => {
@@ -1014,15 +1448,11 @@
         }
     });
 
-    dom.curveDetails.addEventListener('toggle', () => {
-        if (dom.curveDetails.open && state.width > 0) {
-            const gSize = getCurveGridSize(state.width, state.height);
-            drawCurve(dom.cvsCurve, gSize.w, gSize.h, state.curveType);
-        }
-    });
-
-    // Initialize description
+    // ===== INIT =====
+    initComparisonSlider();
     updateCurveInfo();
+    drawHeatmapLegend();
+    updateQualityUI();
 
     </script>
 </body>
