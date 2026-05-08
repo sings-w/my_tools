@@ -1123,8 +1123,12 @@
             return Math.abs(h) % N;
         }
 
+        // const ratio = parseFloat(dom.rngOffset.value); // 滑块默认值 "0.618"
+        // return Math.round(ratio * N); // 实际常量 = 0.618
+
         const ratio = parseFloat(dom.rngOffset.value);
-        return Math.round(ratio * N);
+        const effectiveRatio = getOffsetMode() === 'default' ? GOLDEN_RATIO : ratio;
+        return Math.round(effectiveRatio * N); // 实际常量 = 0.6180339887498948...
     }
 
     function getOffsetMode() {
