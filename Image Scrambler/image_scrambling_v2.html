@@ -892,7 +892,8 @@
                         <li>使用 <kbd>Ctrl</kbd>+<kbd>V</kbd> 从剪贴板<strong>粘贴</strong>截图或图片</li>
                     </ul>
                     <div class="tutorial-tip">
-                        <strong>提示：</strong>超过 800 万像素的图片会自动缩放。上传后左侧面板会显示图片的尺寸、像素数、宽高比和估算大小。
+                        <!-- <strong>提示：</strong>超过 800 万像素的图片会自动缩放。上传后左侧面板会显示图片的尺寸、像素数、宽高比和估算大小。 -->
+                        <strong>提示：</strong>图片尺寸超过 5000 万会自动缩放。上传后左侧面板会显示图片的尺寸、像素数、宽高比和估算大小。
                     </div>
                 </div>
                 <div class="tutorial-section">
@@ -1583,7 +1584,8 @@
         const img = new Image();
         img.onload = async function() {
             let w = img.naturalWidth, h = img.naturalHeight;
-            const MAX = 8000000;
+            // const MAX = 8000000; // 图片尺寸超过 8MP 会自动缩放
+            const MAX = 50000000;
             if (w * h > MAX) { const s = Math.sqrt(MAX / (w * h)); w = Math.round(w * s); h = Math.round(h * s); }
 
             state.width = w; state.height = h; state.depth = 0; state.heatmapDirty = true;
