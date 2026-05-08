@@ -894,7 +894,9 @@
         img.onload = function() {
             let w = img.naturalWidth, h = img.naturalHeight;
 
-            const MAX_PIXELS = 8000000;
+            // const MAX_PIXELS = 8000000; // 8MP 尺寸限制, 图片尺寸超出8MP会压缩画质
+            const MAX_PIXELS = 50000000;
+
             if (w * h > MAX_PIXELS) {
                 const scale = Math.sqrt(MAX_PIXELS / (w * h));
                 w = Math.round(w * scale);
